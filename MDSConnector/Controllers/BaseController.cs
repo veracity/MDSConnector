@@ -25,21 +25,20 @@ namespace MDSConnector.Controllers
         public string Get()
         {
 
-            var headers = HttpContext.Request.Headers;
-            Console.WriteLine(headers["X-ARR-ClientCert"]);
-            X509Certificate2 clientCertificate = HttpContext.Connection.ClientCertificate;
 
-            if (clientCertificate == null)
-            {
-                Response.StatusCode = 401;
-                return "You must include a X509 certificate with your request";
-            }
-
-            return clientCertificate.ToString();
+            var user = HttpContext.User;
+            var request = HttpContext.Request;
+            var context = HttpContext;
+            var connection = HttpContext.Connection;
+            //if (clientCertificate == null)
+            //{
+            //    Response.StatusCode = 401;
+            //    return "You must include a X509 certificate with your request";
+            //}
             
+            //return clientCertificate.ToString();
+            return "Hello, this is server";
             
-            //var builder = new StringBuilder();
-            //return "From server " + builder.ToString();
         }
     }
 }

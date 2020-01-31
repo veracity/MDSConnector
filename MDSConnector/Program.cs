@@ -21,14 +21,14 @@ namespace MDSConnector
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    //webBuilder.ConfigureKestrel(o =>
-                    //{
-                    //    o.ConfigureHttpsDefaults(o =>
-                    //    {
-                    //        o.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
-                    //        o.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-                    //    });
-                    //});
+                    webBuilder.ConfigureKestrel(o =>
+                    {
+                        o.ConfigureHttpsDefaults(o =>
+                        {
+                            o.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
+                            o.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                        });
+                    });
                     webBuilder.UseStartup<Startup>();
                 });
     }

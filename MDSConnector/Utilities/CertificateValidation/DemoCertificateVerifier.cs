@@ -11,7 +11,7 @@ namespace MDSConnector.Utilities
 
         public X509VerificationResult verify(X509Certificate2 certificate)
         {
-            var response = new X509VerificationResult(true, "Not implemented");
+            var response = new X509VerificationResult(false, "Not implemented");
             return response;
         }
 

@@ -17,13 +17,14 @@ namespace MDSClient
             Console.WriteLine(Directory.GetCurrentDirectory());
             Console.WriteLine("Loading certificate");
 
-            var certificate = await loadCertificate(Directory.GetCurrentDirectory() + @"\clientCertificates\certs\client.pem");
+            //var certificate = await loadCertificate(Directory.GetCurrentDirectory() + @"\clientCertificates\certs\client.pem");
+            var certificate = await loadCertificate(Directory.GetCurrentDirectory() + @"\clientCertificates\root_ca_dnvgl_dev.pfx");
             //var corrupted = File.ReadAllText("clientcertificates\\certs\\corrupted.pem").Replace("\n", "").Replace("\r", "");
 
             //HttpClientSingleton.create(certificate);
 
             var headers = new Dictionary<string, string>();
-            headers.Add("X-ARR-ClientCert", certificate.GetRawCertDataString());
+            //headers.Add("X-ARR-ClientCert", certificate.GetRawCertDataString());
 
             var request = buildRequest("https://localhost:10000",
                                     HttpMethod.Get,
@@ -32,17 +33,17 @@ namespace MDSClient
 
             //var response = await HttpClientSingleton.Instance.sendAsync(request);
 
-            //var handler = new HttpClientHandler();
-            //handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
-            //handler.ClientCertificates.Add(certificate);
-            //handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            //handler.CheckCertificateRevocationList = false;
-            //var client = new HttpClient(handler);
-            //var response = await client.SendAsync(request);
-            //client.Dispose();
-
-            var client = new HttpClient();
+            var handler = new HttpClientHandler();
+            handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
+            handler.ClientCertificates.Add(certificate);
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.CheckCertificateRevocationList = false;
+            var client = new HttpClient(handler);
             var response = await client.SendAsync(request);
+            client.Dispose();
+
+            //var client = new HttpClient();
+            //var response = await client.SendAsync(request);
 
             var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Resposne: {responseString}");
@@ -70,9 +71,10 @@ namespace MDSClient
 
         private async static Task<X509Certificate2> loadCertificate(string path)
         {
-            var certAsBytes = await File.ReadAllBytesAsync(path);
-            //certAsString = certAsString.Replace("\n", "").Replace("\r", "");
-            var certificate = new X509Certificate2(certAsBytes);
+            //var certAsBytes = await File.ReadAllBytesAsync(path);
+            //var certificate = new X509Certificate2(certAsBytes);
+            Console.WriteLine(path);
+            var certificate = new X509Certificate2(path, "1234");
             Console.WriteLine(certificate.ToString());
             return certificate;
         }

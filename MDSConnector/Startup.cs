@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.Certificate;
 using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics;
 using MDSConnector.Utilities;
+using System.Security.Claims;
 
 namespace MDSConnector
 {
@@ -36,6 +37,7 @@ namespace MDSConnector
                 {
                     options.AllowedCertificateTypes = CertificateTypes.All;
                     options.ValidateCertificateUse = false;
+                    options.ValidateValidityPeriod = true;
                     options.Events = new CertificateAuthenticationEvents
                     {
                         OnCertificateValidated = context =>
@@ -55,6 +57,13 @@ namespace MDSConnector
                             //Console.WriteLine(validationResult);
                             if (validationResult.valid)
                             {
+                                var claims = new[]
+                                {
+                                    new Claim(ClaimTypes.NameIdentifier,
+                                                context.ClientCertificate.Subject,
+                                                ClaimValueTypes.String,
+                                                context.Options.ClaimsIssuer),
+                                };
                                 context.Success();
                             }
                             else
@@ -70,25 +79,25 @@ namespace MDSConnector
                 });
             services.AddControllers();
 
-            services.AddCertificateForwarding(
-                options =>
-                {
-                    options.CertificateHeader = "X-ARR-ClientCert";
-                    options.HeaderConverter = headerValue =>
-                    {
-                        X509Certificate2 certificate = null;
-                        if (!string.IsNullOrWhiteSpace(headerValue))
-                        {
-                            Console.WriteLine(headerValue);
-                            //byte[] certAsBytes = Convert.ToByte(headerValue);
-                            byte[] certAsBytes = hexStringToBytes(headerValue);
-                            certificate = new X509Certificate2(certAsBytes);
-                        }
+            //services.AddCertificateForwarding(
+            //    options =>
+            //    {
+            //        options.CertificateHeader = "X-ARR-ClientCert";
+            //        options.HeaderConverter = headerValue =>
+            //        {
+            //            X509Certificate2 certificate = null;
+            //            if (!string.IsNullOrWhiteSpace(headerValue))
+            //            {
+            //                Console.WriteLine(headerValue);
+            //                //byte[] certAsBytes = Convert.ToByte(headerValue);
+            //                byte[] certAsBytes = hexStringToBytes(headerValue);
+            //                certificate = new X509Certificate2(certAsBytes);
+            //            }
 
 
-                        return certificate;
-                    };
-                });
+            //            return certificate;
+            //        };
+            //    });
 
         }
 
@@ -104,9 +113,9 @@ namespace MDSConnector
 
             app.UseRouting();
 
-            app.UseCertificateForwarding();
-            app.UseAuthorization();
+            //app.UseCertificateForwarding();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -114,23 +123,18 @@ namespace MDSConnector
             });
         }
 
-        public void testFunction(X509Certificate2 certificate)
-        {
-            Debug.WriteLine("\n\n " + certificate.ToString() + "\n\n");
-        }
 
+        //public byte[] hexStringToBytes(string hexValue)
+        //{
+        //    string cleaned = hexValue.Replace(" ", "");
+        //    byte[] bytes = new byte[cleaned.Length / 2];
+        //    for (int i = 0; i < cleaned.Length; i+=2)
+        //    {
+        //        bytes[i / 2] = Convert.ToByte(hexValue.Substring(i, 2), 16);
+        //    }
+        //    return bytes;
 
-        public byte[] hexStringToBytes(string hexValue)
-        {
-            string cleaned = hexValue.Replace(" ", "");
-            byte[] bytes = new byte[cleaned.Length / 2];
-            for (int i = 0; i < cleaned.Length; i+=2)
-            {
-                bytes[i / 2] = Convert.ToByte(hexValue.Substring(i, 2), 16);
-            }
-            return bytes;
-
-        }
+        //}
 
     }
 }
