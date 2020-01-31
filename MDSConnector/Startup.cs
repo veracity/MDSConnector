@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics;
+using MDSConnector.Utilities;
 
 namespace MDSConnector
 {
@@ -28,35 +29,66 @@ namespace MDSConnector
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddTransient<ICertificateVerifier, DemoCertificateVerifier>();
             services.AddAuthentication(
                 CertificateAuthenticationDefaults.AuthenticationScheme)
                 .AddCertificate(options =>
                 {
                     options.AllowedCertificateTypes = CertificateTypes.All;
-                    options.ValidateCertificateUse = true;
+                    options.ValidateCertificateUse = false;
                     options.Events = new CertificateAuthenticationEvents
                     {
-                        //OnAuthenticationFailed = context =>
-                        //{
-                        //    context.Fail("Certification validation failed");
-                        //    var certificate = context.HttpContext.Connection.ClientCertificate;
-                        //    return Task.CompletedTask;
-                        //},
                         OnCertificateValidated = context =>
                         {
                             var certificate = context.ClientCertificate;
-                            testFunction(certificate);
+
+                            if (certificate == null)
+                            {
+                                context.Fail("You have not correctly attached a X509 certificate with your request");
+                                return Task.CompletedTask;
+                            }
+
+
+                            var validationService = context.HttpContext.RequestServices.GetService<ICertificateVerifier>();
+
+                            var validationResult = validationService.verify(certificate);
+                            //Console.WriteLine(validationResult);
+                            if (validationResult.valid)
+                            {
+                                context.Success();
+                            }
+                            else
+                            {
+                                context.Fail(validationResult.reason);
+                            }
+
                             return Task.CompletedTask;
                         }
                     };
 
 
                 });
-            //services.AddCertificateForwarding(
-            //    options => {
-            //        options.CertificateHeader
-            //    });
+            services.AddControllers();
+
+            services.AddCertificateForwarding(
+                options =>
+                {
+                    options.CertificateHeader = "X-ARR-ClientCert";
+                    options.HeaderConverter = headerValue =>
+                    {
+                        X509Certificate2 certificate = null;
+                        if (!string.IsNullOrWhiteSpace(headerValue))
+                        {
+                            Console.WriteLine(headerValue);
+                            //byte[] certAsBytes = Convert.ToByte(headerValue);
+                            byte[] certAsBytes = hexStringToBytes(headerValue);
+                            certificate = new X509Certificate2(certAsBytes);
+                        }
+
+
+                        return certificate;
+                    };
+                });
 
         }
 
@@ -72,9 +104,9 @@ namespace MDSConnector
 
             app.UseRouting();
 
+            app.UseCertificateForwarding();
             app.UseAuthorization();
             app.UseAuthentication();
-            //app.UseCertificateForwarding();
 
             app.UseEndpoints(endpoints =>
             {
@@ -87,6 +119,18 @@ namespace MDSConnector
             Debug.WriteLine("\n\n " + certificate.ToString() + "\n\n");
         }
 
+
+        public byte[] hexStringToBytes(string hexValue)
+        {
+            string cleaned = hexValue.Replace(" ", "");
+            byte[] bytes = new byte[cleaned.Length / 2];
+            for (int i = 0; i < cleaned.Length; i+=2)
+            {
+                bytes[i / 2] = Convert.ToByte(hexValue.Substring(i, 2), 16);
+            }
+            return bytes;
+
+        }
 
     }
 }

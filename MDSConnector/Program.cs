@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 
 namespace MDSConnector
 {
@@ -20,6 +21,14 @@ namespace MDSConnector
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    //webBuilder.ConfigureKestrel(o =>
+                    //{
+                    //    o.ConfigureHttpsDefaults(o =>
+                    //    {
+                    //        o.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
+                    //        o.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                    //    });
+                    //});
                     webBuilder.UseStartup<Startup>();
                 });
     }

@@ -25,7 +25,8 @@ namespace MDSConnector.Controllers
         public string Get()
         {
 
-            var connection = HttpContext.Connection;
+            var headers = HttpContext.Request.Headers;
+            Console.WriteLine(headers["X-ARR-ClientCert"]);
             X509Certificate2 clientCertificate = HttpContext.Connection.ClientCertificate;
 
             if (clientCertificate == null)

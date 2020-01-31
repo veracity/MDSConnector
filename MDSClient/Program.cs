@@ -20,27 +20,29 @@ namespace MDSClient
             var certificate = await loadCertificate(Directory.GetCurrentDirectory() + @"\clientCertificates\certs\client.pem");
             //var corrupted = File.ReadAllText("clientcertificates\\certs\\corrupted.pem").Replace("\n", "").Replace("\r", "");
 
-            HttpClientSingleton.create(certificate);
+            //HttpClientSingleton.create(certificate);
 
             var headers = new Dictionary<string, string>();
-            //var request = buildRequest("https://localhost:44365/",
-            //                        HttpMethod.Get,
-            //                        headers);
-            var request = buildRequest("https://localhost:5001",
+            headers.Add("X-ARR-ClientCert", certificate.GetRawCertDataString());
+
+            var request = buildRequest("https://localhost:10000",
                                     HttpMethod.Get,
                                     headers);
 
 
-            var response = await HttpClientSingleton.Instance.sendAsync(request);
+            //var response = await HttpClientSingleton.Instance.sendAsync(request);
 
             //var handler = new HttpClientHandler();
+            //handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
             //handler.ClientCertificates.Add(certificate);
             //handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            //handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+            //handler.CheckCertificateRevocationList = false;
             //var client = new HttpClient(handler);
             //var response = await client.SendAsync(request);
+            //client.Dispose();
 
-
+            var client = new HttpClient();
+            var response = await client.SendAsync(request);
 
             var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Resposne: {responseString}");
