@@ -26,6 +26,9 @@
     <None Update="clientCertificates\certs\expired.pem">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="clientCertificates\dnvgl_expired.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="clientCertificates\root_ca_dnvgl_dev.crt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

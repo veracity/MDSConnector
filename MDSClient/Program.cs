@@ -17,11 +17,16 @@ namespace MDSClient
             Console.WriteLine(Directory.GetCurrentDirectory());
             Console.WriteLine("Loading certificate");
 
-            //var certificate = await loadCertificate(Directory.GetCurrentDirectory() + @"\clientCertificates\certs\client.pem");
-            var certificate = await loadCertificate(Directory.GetCurrentDirectory() + @"\clientCertificates\root_ca_dnvgl_dev.pfx");
-            //var corrupted = File.ReadAllText("clientcertificates\\certs\\corrupted.pem").Replace("\n", "").Replace("\r", "");
+            var certificatePaths = new Dictionary<string, string>
+            {
+                {"pfx", @"\clientCertificates\root_ca_dnvgl_dev.pfx"},
+                {"crt", @"\clientCertificates\root_ca_dnvgl_dev.crt"}
+            };
 
-            //HttpClientSingleton.create(certificate);
+            //var corrupted = File.ReadAllText("clientcertificates\\certs\\corrupted.pem").Replace("\n", "").Replace("\r", "");
+            var certificate = await loadCertificate(Path.Combine(Directory.GetCurrentDirectory(), certificatePaths["PFX"]));
+
+            HttpClientSingleton.create(certificate);
 
             var headers = new Dictionary<string, string>();
             //headers.Add("X-ARR-ClientCert", certificate.GetRawCertDataString());
@@ -31,19 +36,8 @@ namespace MDSClient
                                     headers);
 
 
-            //var response = await HttpClientSingleton.Instance.sendAsync(request);
+            var response = await HttpClientSingleton.Instance.sendAsync(request);
 
-            var handler = new HttpClientHandler();
-            handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
-            handler.ClientCertificates.Add(certificate);
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.CheckCertificateRevocationList = false;
-            var client = new HttpClient(handler);
-            var response = await client.SendAsync(request);
-            client.Dispose();
-
-            //var client = new HttpClient();
-            //var response = await client.SendAsync(request);
 
             var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Resposne: {responseString}");
@@ -71,30 +65,21 @@ namespace MDSClient
 
         private async static Task<X509Certificate2> loadCertificate(string path)
         {
-            //var certAsBytes = await File.ReadAllBytesAsync(path);
-            //var certificate = new X509Certificate2(certAsBytes);
             Console.WriteLine(path);
-            var certificate = new X509Certificate2(path, "1234");
+            var certAsBytes = await File.ReadAllBytesAsync(path);
+            X509Certificate2 certificate = null;
+            if (path.Contains(".pfx"))
+            {
+                certificate = new X509Certificate2(path, "1234");
+            }
+            else
+            {
+                certificate = new X509Certificate2(certAsBytes);
+
+            }
             Console.WriteLine(certificate.ToString());
             return certificate;
         }
-
-        private static string exportCertificateAsString(X509Certificate2 certificate)
-        {
-            StringBuilder builder = new StringBuilder();
-
-            builder.AppendLine("-----BEGIN CERTIFICATE-----");
-            
-            byte[] certificateContents = certificate.Export(X509ContentType.Cert);
-            var certificateContentAsString = Convert.ToBase64String(certificateContents, Base64FormattingOptions.InsertLineBreaks);
-            builder.AppendLine(certificateContentAsString);
-
-            builder.AppendLine("-----END CERTIFICATE-----");
-            
-            return builder.ToString();
-
-        }
-
 
     }
 }
