@@ -20,11 +20,13 @@ namespace MDSClient
             var certificatePaths = new Dictionary<string, string>
             {
                 {"pfx", @"\clientCertificates\root_ca_dnvgl_dev.pfx"},
-                {"crt", @"\clientCertificates\root_ca_dnvgl_dev.crt"}
+                {"crt", @"\clientCertificates\root_ca_dnvgl_dev.crt"},
+                {"expired", @"\clientCertificates\dnvgl_expired.pfx"}
             };
 
             //var corrupted = File.ReadAllText("clientcertificates\\certs\\corrupted.pem").Replace("\n", "").Replace("\r", "");
-            var certificate = await loadCertificate(Path.Combine(Directory.GetCurrentDirectory(), certificatePaths["PFX"]));
+            var certificate = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["crt"]);
+            Console.WriteLine(certificate.ToString());
 
             HttpClientSingleton.create(certificate);
 
@@ -77,7 +79,6 @@ namespace MDSClient
                 certificate = new X509Certificate2(certAsBytes);
 
             }
-            Console.WriteLine(certificate.ToString());
             return certificate;
         }
 

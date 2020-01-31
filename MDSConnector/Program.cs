@@ -26,7 +26,7 @@ namespace MDSConnector
                         o.ConfigureHttpsDefaults(o =>
                         {
                             o.SslProtocols = System.Security.Authentication.SslProtocols.Tls;
-                            o.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                            o.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
                         });
                     });
                     webBuilder.UseStartup<Startup>();

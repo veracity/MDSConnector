@@ -37,7 +37,7 @@ namespace MDSConnector
                 {
                     options.AllowedCertificateTypes = CertificateTypes.All;
                     options.ValidateCertificateUse = false;
-                    options.ValidateValidityPeriod = true;
+                    options.ValidateValidityPeriod = false;
                     options.Events = new CertificateAuthenticationEvents
                     {
                         OnCertificateValidated = context =>

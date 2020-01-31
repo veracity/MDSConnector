@@ -30,13 +30,7 @@ namespace MDSConnector.Controllers
             var request = HttpContext.Request;
             var context = HttpContext;
             var connection = HttpContext.Connection;
-            //if (clientCertificate == null)
-            //{
-            //    Response.StatusCode = 401;
-            //    return "You must include a X509 certificate with your request";
-            //}
-            
-            //return clientCertificate.ToString();
+
             return "Hello, this is server";
             
         }
