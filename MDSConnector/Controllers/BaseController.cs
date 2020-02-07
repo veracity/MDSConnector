@@ -31,8 +31,10 @@ namespace MDSConnector.Controllers
             var context = HttpContext;
             var connection = HttpContext.Connection;
 
-            return "Hello, this is server";
-            
+            var claims = user.Claims.ToList();
+
+
+            return "This is the server";
         }
     }
 }
