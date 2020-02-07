@@ -27,11 +27,6 @@ namespace MDSConnector
                     {
                         o.ConfigureHttpsDefaults(o =>
                         {
-                            //o.SslProtocols = System.Security.Authentication.SslProtocols.Tls11 
-                            //                | System.Security.Authentication.SslProtocols.Tls12
-                            //                | System.Security.Authentication.SslProtocols.Tls13;
-                            //o.SslProtocols = System.Security.Authentication.SslProtocols.None;
-                            //o.ServerCertificate = new X509Certificate2("root_ca_dnvgl_dev.pfx", "1234");
                             o.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
                         });
                     });

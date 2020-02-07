@@ -29,8 +29,6 @@ namespace MDSClient
 
 
 
-
-
             var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["pfx"], "1234");
 
             HttpClientSingleton.create(certificateFromFile);
@@ -47,6 +45,7 @@ namespace MDSClient
 
             var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Resposne: {responseString}");
+            Console.WriteLine($"Res code: {response.StatusCode}");
 
 
         }

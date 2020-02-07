@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Certificate;
 
 namespace MDSConnector.Controllers
 {
@@ -22,16 +24,14 @@ namespace MDSConnector.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public string Get()
         {
 
 
-            var user = HttpContext.User;
-            var request = HttpContext.Request;
-            var context = HttpContext;
-            var connection = HttpContext.Connection;
 
-            var claims = user.Claims.ToList();
+            var claims = HttpContext.User.Claims;
+            var identity = HttpContext.User.Identity;
 
 
             return "This is the server";

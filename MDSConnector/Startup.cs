@@ -35,9 +35,13 @@ namespace MDSConnector
                 .AddCertificate(options =>
                 {
                     options.AllowedCertificateTypes = CertificateTypes.All;
-                    options.ValidateCertificateUse = false;
-                    options.ValidateValidityPeriod = false;
+                    options.ValidateCertificateUse = true;
+                    options.ValidateValidityPeriod = true;
+
+                    //Should be checked if in production
                     options.RevocationMode = X509RevocationMode.NoCheck;
+                    /////
+
                     options.Events = new CertificateAuthenticationEvents
                     {
                         OnCertificateValidated = context =>
@@ -53,16 +57,22 @@ namespace MDSConnector
 
                             var validationService = context.HttpContext.RequestServices.GetService<ICertificateVerifier>();
 
-                            var validationResult = validationService.verify(certificate);
+                            var validationResult = validationService.verify(certificate, new HashSet<string>());
                             Console.WriteLine(validationResult);
                             if (validationResult.valid)
                             {
                                 var claims = new[]
                                 {
-                                    new Claim(ClaimTypes.NameIdentifier,
-                                                context.ClientCertificate.Subject,
-                                                ClaimValueTypes.String,
-                                                context.Options.ClaimsIssuer),
+                                    new Claim(
+                                        ClaimTypes.NameIdentifier,
+                                        context.ClientCertificate.Subject,
+                                        ClaimValueTypes.String,
+                                        context.Options.ClaimsIssuer),
+                                    new Claim(
+                                        ClaimTypes.Name,
+                                        context.ClientCertificate.Subject,
+                                        ClaimValueTypes.String,
+                                        context.Options.ClaimsIssuer)
                                 };
                                 context.Principal = new ClaimsPrincipal(
                                      new ClaimsIdentity(claims, context.Scheme.Name));
@@ -74,6 +84,11 @@ namespace MDSConnector
                             }
 
                             return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            context.Fail("Certificate validation failed");
+                            return Task.CompletedTask;
                         }
                     };
 
@@ -81,27 +96,6 @@ namespace MDSConnector
                 });
             services.AddControllers();
             services.AddTransient<ICertificateVerifier, DemoCertificateVerifier>();
-
-
-            //services.AddCertificateForwarding(
-            //    options =>
-            //    {
-            //        options.CertificateHeader = "X-ARR-ClientCert";
-            //        options.HeaderConverter = headerValue =>
-            //        {
-            //            X509Certificate2 certificate = null;
-            //            if (!string.IsNullOrWhiteSpace(headerValue))
-            //            {
-            //                Console.WriteLine(headerValue);
-            //                //byte[] certAsBytes = Convert.ToByte(headerValue);
-            //                byte[] certAsBytes = hexStringToBytes(headerValue);
-            //                certificate = new X509Certificate2(certAsBytes);
-            //            }
-
-
-            //            return certificate;
-            //        };
-            //    });
 
         }
 
@@ -126,19 +120,6 @@ namespace MDSConnector
                 endpoints.MapControllers();
             });
         }
-
-
-        //public byte[] hexStringToBytes(string hexValue)
-        //{
-        //    string cleaned = hexValue.Replace(" ", "");
-        //    byte[] bytes = new byte[cleaned.Length / 2];
-        //    for (int i = 0; i < cleaned.Length; i+=2)
-        //    {
-        //        bytes[i / 2] = Convert.ToByte(hexValue.Substring(i, 2), 16);
-        //    }
-        //    return bytes;
-
-        //}
 
     }
 }

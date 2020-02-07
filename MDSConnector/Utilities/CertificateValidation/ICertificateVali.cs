@@ -8,6 +8,6 @@ namespace MDSConnector.Utilities
 {
     interface ICertificateVerifier
     {
-        public X509VerificationResult verify(X509Certificate2 certificate);
+        public X509VerificationResult verify(X509Certificate2 certificate, HashSet<string> trustedIssuers);
     }
 }
