@@ -30,14 +30,14 @@ namespace MDSConnector
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<ICertificateVerifier, DemoCertificateVerifier>();
             services.AddAuthentication(
                 CertificateAuthenticationDefaults.AuthenticationScheme)
                 .AddCertificate(options =>
                 {
                     options.AllowedCertificateTypes = CertificateTypes.All;
                     options.ValidateCertificateUse = false;
-                    options.ValidateValidityPeriod = true;
+                    options.ValidateValidityPeriod = false;
+                    options.RevocationMode = X509RevocationMode.NoCheck;
                     options.Events = new CertificateAuthenticationEvents
                     {
                         OnCertificateValidated = context =>
@@ -54,7 +54,7 @@ namespace MDSConnector
                             var validationService = context.HttpContext.RequestServices.GetService<ICertificateVerifier>();
 
                             var validationResult = validationService.verify(certificate);
-                            //Console.WriteLine(validationResult);
+                            Console.WriteLine(validationResult);
                             if (validationResult.valid)
                             {
                                 var claims = new[]
@@ -64,6 +64,8 @@ namespace MDSConnector
                                                 ClaimValueTypes.String,
                                                 context.Options.ClaimsIssuer),
                                 };
+                                context.Principal = new ClaimsPrincipal(
+                                     new ClaimsIdentity(claims, context.Scheme.Name));
                                 context.Success();
                             }
                             else
@@ -78,6 +80,8 @@ namespace MDSConnector
 
                 });
             services.AddControllers();
+            services.AddTransient<ICertificateVerifier, DemoCertificateVerifier>();
+
 
             //services.AddCertificateForwarding(
             //    options =>

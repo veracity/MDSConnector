@@ -58,8 +58,6 @@ namespace MDSClient
 
         public Task<HttpResponseMessage> sendAsync(HttpRequestMessage request)
         {
-            Console.WriteLine("Break point");
-            
             return client.SendAsync(request);
         }
 

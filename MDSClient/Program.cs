@@ -5,6 +5,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using System.Net;
+using System.Security.Authentication;
+using System.Net.Security;
 
 namespace MDSClient
 {
@@ -20,16 +23,19 @@ namespace MDSClient
             var certificatePaths = new Dictionary<string, string>
             {
                 {"pfx", @"\clientCertificates\root_ca_dnvgl_dev.pfx"},
-                {"crt", @"\clientCertificates\root_ca_dnvgl_dev.crt"}
+                {"crt", @"\clientCertificates\root_ca_dnvgl_dev.crt"},
+                {"expired", @"\clientCertificates\dnvgl_expired.pfx"}
             };
 
-            //var corrupted = File.ReadAllText("clientcertificates\\certs\\corrupted.pem").Replace("\n", "").Replace("\r", "");
-            var certificate = await loadCertificate(Path.Combine(Directory.GetCurrentDirectory(), certificatePaths["PFX"]));
 
-            HttpClientSingleton.create(certificate);
+
+
+
+            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["pfx"], "1234");
+
+            HttpClientSingleton.create(certificateFromFile);
 
             var headers = new Dictionary<string, string>();
-            //headers.Add("X-ARR-ClientCert", certificate.GetRawCertDataString());
 
             var request = buildRequest("https://localhost:10000",
                                     HttpMethod.Get,
@@ -41,7 +47,7 @@ namespace MDSClient
 
             var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Resposne: {responseString}");
-            
+
 
         }
 
@@ -63,21 +69,19 @@ namespace MDSClient
             return httpRequestMessage;
         }
 
-        private async static Task<X509Certificate2> loadCertificate(string path)
+        private async static Task<X509Certificate2> loadCertificate(string path, string password)
         {
-            Console.WriteLine(path);
-            var certAsBytes = await File.ReadAllBytesAsync(path);
             X509Certificate2 certificate = null;
             if (path.Contains(".pfx"))
             {
-                certificate = new X509Certificate2(path, "1234");
+                certificate = new X509Certificate2(path, password);
             }
             else
             {
+                var certAsBytes = await File.ReadAllBytesAsync(path);
                 certificate = new X509Certificate2(certAsBytes);
 
             }
-            Console.WriteLine(certificate.ToString());
             return certificate;
         }
 
