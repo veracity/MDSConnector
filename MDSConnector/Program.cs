@@ -28,9 +28,14 @@ namespace MDSConnector
                         o.ConfigureHttpsDefaults(o =>
                         {
                             o.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                            o.CheckCertificateRevocation = false;
+                            o.AllowAnyClientCertificate();
+                            
                         });
+                        
                     });
                     webBuilder.UseStartup<Startup>();
                 });
+            
     }
 }
