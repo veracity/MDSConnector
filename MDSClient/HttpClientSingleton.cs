@@ -21,6 +21,7 @@ namespace MDSClient
         private HttpClientSingleton(X509Certificate2 certificate)
         {
             var clientHandler = new HttpClientHandler();
+            clientHandler.CheckCertificateRevocationList = false;
             clientHandler.ClientCertificates.Add(certificate);
             clientHandler.ClientCertificateOptions = ClientCertificateOption.Manual;
             handler = clientHandler;

@@ -27,18 +27,20 @@ namespace MDSClient
                 {"expired", @"\clientCertificates\dnvgl_expired.pfx"}
             };
 
+            //HttpClient client = new HttpClient();
+            //var response = await client.GetAsync(new Uri("https://localhost:10001"));
+            //Console.WriteLine(response.Content);
 
-
-            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["pfx"], "1234");
-
-            HttpClientSingleton.create(certificateFromFile);
+            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["crt"], "1234");
+            Console.WriteLine(certificateFromFile.Verify());
+            HttpClientSingleton.create(certificateFromFile); 
 
             var headers = new Dictionary<string, string>();
 
-            var request = buildRequest("https://localhost:10000",
+            var request = buildRequest("https://localhost:10001",
                                     HttpMethod.Get,
                                     headers);
-
+                
 
             var response = await HttpClientSingleton.Instance.sendAsync(request);
 
@@ -46,6 +48,7 @@ namespace MDSClient
             var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Resposne: {responseString}");
             Console.WriteLine($"Res code: {response.StatusCode}");
+
 
 
         }
