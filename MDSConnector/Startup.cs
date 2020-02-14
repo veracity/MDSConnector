@@ -16,6 +16,9 @@ using System.Diagnostics;
 using MDSConnector.Utilities;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using System.Net.Http;
+using MDSConnector.Utilities.ConfigHelpers;
+using MDSConnector.APIClients;
 
 namespace MDSConnector
 {
@@ -32,6 +35,34 @@ namespace MDSConnector
         public void ConfigureServices(IServiceCollection services)
         {
 
+            //Initiate config objects
+            IConfigurationSection mdsSection = Configuration.GetSection("MDSConfig");
+            services.Configure<MDSConfig>(mdsSection);
+            IConfigurationSection veracitySection = Configuration.GetSection("veracityConfig");
+            services.Configure<VeracityConfig>(veracitySection);
+
+
+
+            //services.BuildServiceProvider()
+
+            
+
+            services.AddSingleton<HttpClient>();
+            services.AddSingleton(s => new MDSClient(
+                                            s.GetService<ILogger<MDSClient>>(), 
+                                            s.GetService<HttpClient>(), 
+                                            s.GetService<MDSConfig>()));
+            services.AddSingleton(s => new VeracityClient(
+                                            s.GetService<ILogger<VeracityClient>>(),
+                                            s.GetService<HttpClient>(),
+                                            s.GetService<VeracityConfig>()));
+
+            services.AddLogging(config =>
+            {
+                config.AddDebug();
+                config.AddConsole();
+            });
+
             services.AddControllers();
             services.AddAuthentication(options =>
             {
@@ -40,90 +71,6 @@ namespace MDSConnector
             })
             .AddCertificate()
             .AddScheme<AuthenticationSchemeOptions, CustomCertificateAuthenticator>("CustomCertificationAuthentication", null);
-
-
-
-            //            services.AddAuthentication(
-            //            CertificateAuthenticationDefaults.AuthenticationScheme)
-            //                .AddCertificate(options =>
-            //                {
-            //                    options.AllowedCertificateTypes = CertificateTypes.All;
-            //                    options.ValidateCertificateUse = false;
-            //                    options.ValidateValidityPeriod = false;
-
-            //                    //Should be checked if in production
-            //                    options.RevocationMode = X509RevocationMode.NoCheck;
-            //                    /////
-
-            //                    options.Events = new CertificateAuthenticationEvents
-            //                    {
-            //                        OnCertificateValidated = context =>
-            //                        {
-            //                            var certificate = context.ClientCertificate;
-            //                            if (certificate == null)
-            //                            {
-            //                                context.Fail("You have not correctly attached a X509 certificate with your request");
-            //                                return Task.CompletedTask;
-            //                            }
-
-
-            //                            var validationService = context.HttpContext.RequestServices.GetService<ICertificateVerifier>();
-
-            //                            var validationResult = validationService.verify(certificate, new HashSet<string>());
-            //                            Console.WriteLine(validationResult);
-            //                            if (validationResult.valid)
-            //                            {
-            //                                var claims = new[]
-            //                                {
-            //                                    new Claim(
-            //                                        ClaimTypes.NameIdentifier,
-            //                                        context.ClientCertificate.Subject,
-            //                                        ClaimValueTypes.String,
-            //                                        context.Options.ClaimsIssuer),
-            //                                    new Claim(
-            //                                        ClaimTypes.Name,
-            //                                        context.ClientCertificate.Subject,
-            //                                        ClaimValueTypes.String,
-            //                                        context.Options.ClaimsIssuer)
-            //                                };
-            //                                context.Principal = new ClaimsPrincipal(
-            //                                     new ClaimsIdentity(claims, context.Scheme.Name));
-            //                                context.Success();
-            //                            }
-            //                            else
-            //                            {
-            //                                context.Fail(validationResult.reason);
-            //                            }
-
-            //                            return Task.CompletedTask;
-            //                        },
-            //                        OnAuthenticationFailed = context =>
-            //                        {
-            //                            Console.WriteLine("FAILED!!!!!!!!!!!!!!!!!");
-            //                            //context.Fail("Certificate validation failed");
-            //                            var claims = new[]
-            //{
-            //                                    new Claim(
-            //                                        ClaimTypes.NameIdentifier,
-            //                                        "FAILED TEST",
-            //                                        ClaimValueTypes.String,
-            //                                        context.Options.ClaimsIssuer),
-            //                                    new Claim(
-            //                                        ClaimTypes.Name,
-            //                                        "FAILED TEST",
-            //                                        ClaimValueTypes.String,
-            //                                        context.Options.ClaimsIssuer)
-            //                                };
-            //                            context.Principal = new ClaimsPrincipal(
-            //                                 new ClaimsIdentity(claims, context.Scheme.Name));
-            //                            context.Success();
-
-            //                            return Task.CompletedTask;
-            //                        }
-            //                    };
-
-
-            //                });
 
             services.AddTransient<ICertificateVerifier, DemoCertificateVerifier>();
 
