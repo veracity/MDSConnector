@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.APIClients
 {
-    interface IVeracityClient
+    public interface IVeracityClient
     {
     }
 }

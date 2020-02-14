@@ -1,5 +1,6 @@
 ﻿using MDSConnector.Utilities.ConfigHelpers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,11 +16,11 @@ namespace MDSConnector.APIClients
         private readonly HttpClient _client;
         private readonly VeracityConfig _config;
        
-        public VeracityClient(ILogger<VeracityClient> logger, HttpClient client, VeracityConfig config)
+        public VeracityClient(ILogger<VeracityClient> logger, HttpClient client, IOptions<VeracityConfig> config)
         {
             _logger = logger;
             _client = client;
-            _config = config;
+            _config = config.Value;
         }
 
 

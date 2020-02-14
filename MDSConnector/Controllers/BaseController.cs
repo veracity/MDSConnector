@@ -21,10 +21,10 @@ namespace MDSConnector.Controllers
     public class BaseController: ControllerBase
     {
         private readonly ILogger<BaseController> _logger;
-        private readonly MDSClient _mdsClient;
-        private readonly VeracityClient _veracityClient;
+        private readonly IMDSClient _mdsClient;
+        private readonly IVeracityClient _veracityClient;
 
-        public BaseController(ILogger<BaseController> logger, MDSClient mdsClient, VeracityClient veracityClient)
+        public BaseController(ILogger<BaseController> logger, IMDSClient mdsClient, IVeracityClient veracityClient)
         {
             _logger = logger;
             _mdsClient = mdsClient;
@@ -48,12 +48,23 @@ namespace MDSConnector.Controllers
         [HttpGet]
         //[Authorize]
         [Route("getvesselnames")]
-        public IActionResult GetVesselNames()
+        public async Task<IActionResult> GetVesselNames()
         {
 
-            var tokenRes = _mdsClient.GetVesselNames();
+            var vesselRes = await _mdsClient.GetVesselNames();
 
-            return Ok(tokenRes);
+            return Ok(vesselRes);
+        }
+
+        [HttpGet]
+        //[Authorize]
+        [Route("infrastructure")]
+        public async Task<IActionResult> GetInfrastructure()
+        {
+
+            var infrastructureRes = await _mdsClient.GetInfrastructure();
+
+            return Ok(infrastructureRes);
         }
     }
 }

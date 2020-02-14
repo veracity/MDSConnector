@@ -56,8 +56,8 @@ namespace MDSConnector
             //                                s.GetService<ILogger<VeracityClient>>(),
             //                                s.GetService<HttpClient>(),
             //                                s.GetService<VeracityConfig>()));
-            services.AddSingleton<IMDSClient, MDSClient>();
-            services.AddSingleton<IVeracityClient, VeracityClient>();
+            services.AddScoped<IMDSClient, MDSClient>();
+            services.AddScoped<IVeracityClient, VeracityClient>();
 
 
             services.AddLogging(config =>
@@ -66,7 +66,8 @@ namespace MDSConnector
                 config.AddConsole();
             });
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddAuthentication(options =>
             {
                 //options.DefaultAuthenticateScheme = "CustomCertificationAuthentication";

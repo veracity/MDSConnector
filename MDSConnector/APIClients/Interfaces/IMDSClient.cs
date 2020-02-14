@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.APIClients
 {
-    interface IMDSClient
+    public interface IMDSClient
     {
         public Task<string> GetVesselNames();
-
+        public Task<string> GetInfrastructure();
     }
 }
