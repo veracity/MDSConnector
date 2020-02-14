@@ -47,15 +47,18 @@ namespace MDSConnector
 
             
 
-            services.AddSingleton<HttpClient>();
-            services.AddSingleton(s => new MDSClient(
-                                            s.GetService<ILogger<MDSClient>>(), 
-                                            s.GetService<HttpClient>(), 
-                                            s.GetService<MDSConfig>()));
-            services.AddSingleton(s => new VeracityClient(
-                                            s.GetService<ILogger<VeracityClient>>(),
-                                            s.GetService<HttpClient>(),
-                                            s.GetService<VeracityConfig>()));
+            services.AddScoped<HttpClient>();
+            //services.AddSingleton(s => new MDSClient(
+            //                                s.GetService<ILogger<MDSClient>>(), 
+            //                                s.GetService<HttpClient>(), 
+            //                                s.GetService<MDSConfig>()));
+            //services.AddSingleton(s => new VeracityClient(
+            //                                s.GetService<ILogger<VeracityClient>>(),
+            //                                s.GetService<HttpClient>(),
+            //                                s.GetService<VeracityConfig>()));
+            services.AddSingleton<IMDSClient, MDSClient>();
+            services.AddSingleton<IVeracityClient, VeracityClient>();
+
 
             services.AddLogging(config =>
             {
