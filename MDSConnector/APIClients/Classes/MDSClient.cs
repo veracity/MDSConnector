@@ -19,8 +19,7 @@ namespace MDSConnector.APIClients
         private readonly ILogger<MDSClient> _logger;
         private readonly HttpClient _client;
         private readonly MDSConfig _config;
-        //private JwtSecurityToken _token = null;
-        private JwtSecurityToken _token = new JwtSecurityToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ2ZXJhY2l0eSIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE1ODE2OTI0NjksImV4cCI6MTU4MTc3ODg2OX0.j86omnlUFKDcR_sRkXZATA10mZIn8j240_tq7D16PmK2nxuGflxR-ezDCLA8eqLd-H7Lm-UaoUZQC44Ig_DwBA");
+        private JwtSecurityToken _token = null;
 
 
         public MDSClient(ILogger<MDSClient> logger, HttpClient client, IOptions<MDSConfig> config)
