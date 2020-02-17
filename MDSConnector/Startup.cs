@@ -38,12 +38,12 @@ namespace MDSConnector
             //Initiate config objects
             IConfigurationSection mdsSection = Configuration.GetSection("MDSConfig");
             services.Configure<MDSConfig>(mdsSection);
-            IConfigurationSection veracitySection = Configuration.GetSection("veracityConfig");
-            services.Configure<VeracityConfig>(veracitySection);
+            IConfigurationSection azureStorageSection = Configuration.GetSection("azureStorageConfig");
+            services.Configure<AzureStorageConfig>(azureStorageSection);
 
             services.AddScoped<HttpClient>();
             services.AddScoped<IMDSClient, MDSClient>();
-            services.AddScoped<IVeracityClient, VeracityClient>();
+            services.AddScoped<IAzureStorageClient, AzureStorageClient>();
 
 
             services.AddLogging(config =>

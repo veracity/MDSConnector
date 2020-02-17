@@ -33,8 +33,7 @@ namespace MDSConnector.Utilities.ResponseParsers
                 }
                 return vesselNames;
             }
-
-            throw new Exception($"VesselNames Response Content type: {contentType} not supported.");
+            throw new NotImplementedException($"VesselNames Response Content type: {contentType} not supported.");
         }
 
 

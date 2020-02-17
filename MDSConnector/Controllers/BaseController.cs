@@ -23,13 +23,13 @@ namespace MDSConnector.Controllers
     {
         private readonly ILogger<BaseController> _logger;
         private readonly IMDSClient _mdsClient;
-        private readonly IVeracityClient _veracityClient;
+        private readonly IAzureStorageClient _azureStorageClient;
 
-        public BaseController(ILogger<BaseController> logger, IMDSClient mdsClient, IVeracityClient veracityClient)
+        public BaseController(ILogger<BaseController> logger, IMDSClient mdsClient, IAzureStorageClient azureStorageClient)
         {
             _logger = logger;
             _mdsClient = mdsClient;
-            _veracityClient = veracityClient;
+            _azureStorageClient = azureStorageClient;
         }
 
         [HttpGet]
@@ -54,13 +54,14 @@ namespace MDSConnector.Controllers
             }
             catch (Exception e){return StatusCode(500, e.Message);}
 
-            string res = "";
-            foreach (var vesselName in vesselNames)
+            var fileName = "vesselNames_" + Guid.NewGuid().ToString() + ".json";
+            try
             {
-                res += $"{vesselName.Name} {vesselName.Imo}\n";
+                await _azureStorageClient.UploadVesselNames(fileName, vesselNames);
             }
+            catch (Exception e) {   return StatusCode(500, e.Message);  }
 
-            return Ok(res);
+            return Ok();
         }
 
         [HttpGet]

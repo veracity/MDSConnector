@@ -5,14 +5,13 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.Utilities.ConfigHelpers
 {
-    public class VeracityConfig
+    public class AzureStorageConfig
     {
-        public string baseUrl { get; set; }
-        public string subscriptionKey { get; set; }
+        public string sasToken { get; set; }
 
         public override string ToString()
         {
-            return $"baseUrl: {baseUrl} \n subscriptionKey: {subscriptionKey}";
+            return $"SAS Token: {sasToken}";
         }
     }
 }
