@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using MDSConnector.Utilities.ConfigHelpers;
 using Microsoft.Extensions.Options;
 using MDSConnector.APIClients;
+using MDSConnector.Models;
 
 namespace MDSConnector.Controllers
 {
@@ -35,25 +36,31 @@ namespace MDSConnector.Controllers
         [Authorize]
         public string Get()
         {
-
-
-
             var claims = HttpContext.User.Claims;
             var identity = HttpContext.User.Identity;
-
-
             return "This is the server";
         }
+
 
         [HttpGet]
         //[Authorize]
         [Route("getvesselnames")]
         public async Task<IActionResult> GetVesselNames()
         {
+            List<VesselNameModel> vesselNames;
+            try
+            {
+                vesselNames = await _mdsClient.GetVesselNames();
+            }
+            catch (Exception e){return StatusCode(500, e.Message);}
 
-            var vesselRes = await _mdsClient.GetVesselNames();
+            string res = "";
+            foreach (var vesselName in vesselNames)
+            {
+                res += $"{vesselName.Name} {vesselName.Imo}\n";
+            }
 
-            return Ok(vesselRes);
+            return Ok(res);
         }
 
         [HttpGet]

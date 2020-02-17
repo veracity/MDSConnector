@@ -1,4 +1,6 @@
-﻿using MDSConnector.Utilities.ConfigHelpers;
+﻿using MDSConnector.Models;
+using MDSConnector.Utilities.ConfigHelpers;
+using MDSConnector.Utilities.ResponseParsers;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -6,11 +8,15 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Serialization;
 
 namespace MDSConnector.APIClients
 {
@@ -29,12 +35,9 @@ namespace MDSConnector.APIClients
             _config = config.Value;
         }
 
-        public async Task<string> GetVesselNames()
+        public async Task<List<VesselNameModel>> GetVesselNames()
         {
-            if (_token == null)
-            {
-                await GetAuthToken();
-            }
+            if (_token == null) {   await GetAuthToken();   }
 
 
             var request = new HttpRequestMessage();
@@ -43,19 +46,18 @@ namespace MDSConnector.APIClients
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
 
             var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Get vessel names failed");
+            }
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            return responseContent;
-
+            return await VesselNamesResponseParser.Parse(response);
         }
+
 
         public async Task<string> GetInfrastructure()
         {
-            if (_token == null)
-            {
-                await GetAuthToken();
-            }
+            if (_token == null) {   await GetAuthToken();   }
 
             var request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
@@ -63,15 +65,21 @@ namespace MDSConnector.APIClients
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
 
             var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Get infrastructure failed");
+            }
 
             var responseContent = await response.Content.ReadAsStringAsync();
+
+
+
             return responseContent;
 
         }
 
 
-        private async Task<bool> GetAuthToken()
+        private async Task GetAuthToken()
         {
             dynamic requestBody = new ExpandoObject();
             requestBody.username = _config.username;
@@ -84,14 +92,13 @@ namespace MDSConnector.APIClients
                                 "applicaiton/json");
 
             var response = await _client.PostAsync(_config.baseUrl + "/auth", serializedContent);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Get authorization token failed");
+            }
 
             var rawTokens = response.Headers.GetValues("Authorization").ToList();
-            _logger.LogError(rawTokens[0]);
             _token = new JwtSecurityToken(rawTokens[0].Split(' ')[1]);
-
-
-            return true;
         }
 
 

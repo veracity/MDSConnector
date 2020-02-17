@@ -41,21 +41,7 @@ namespace MDSConnector
             IConfigurationSection veracitySection = Configuration.GetSection("veracityConfig");
             services.Configure<VeracityConfig>(veracitySection);
 
-
-
-            //services.BuildServiceProvider()
-
-            
-
             services.AddScoped<HttpClient>();
-            //services.AddSingleton(s => new MDSClient(
-            //                                s.GetService<ILogger<MDSClient>>(), 
-            //                                s.GetService<HttpClient>(), 
-            //                                s.GetService<MDSConfig>()));
-            //services.AddSingleton(s => new VeracityClient(
-            //                                s.GetService<ILogger<VeracityClient>>(),
-            //                                s.GetService<HttpClient>(),
-            //                                s.GetService<VeracityConfig>()));
             services.AddScoped<IMDSClient, MDSClient>();
             services.AddScoped<IVeracityClient, VeracityClient>();
 
@@ -66,8 +52,11 @@ namespace MDSConnector
                 config.AddConsole();
             });
 
+            services.AddDistributedMemoryCache();
+
+
             services.AddControllers()
-                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);                
             services.AddAuthentication(options =>
             {
                 //options.DefaultAuthenticateScheme = "CustomCertificationAuthentication";
@@ -92,10 +81,8 @@ namespace MDSConnector
 
             app.UseRouting();
 
-            //app.UseCertificateForwarding();
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.UseEndpoints(endpoints =>
             {
