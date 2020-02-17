@@ -47,19 +47,13 @@ namespace MDSConnector.Controllers
         [Route("getvesselnames")]
         public async Task<IActionResult> GetVesselNames()
         {
-            List<VesselNameModel> vesselNames;
             try
             {
-                vesselNames = await _mdsClient.GetVesselNames();
-            }
-            catch (Exception e){return StatusCode(500, e.Message);}
-
-            var fileName = "vesselNames_" + Guid.NewGuid().ToString() + ".json";
-            try
-            {
+                var vesselNames = await _mdsClient.GetVesselNames();
+                var fileName = "vesselNames_" + Guid.NewGuid().ToString() + ".json"; 
                 await _azureStorageClient.UploadVesselNames(fileName, vesselNames);
             }
-            catch (Exception e) {   return StatusCode(500, e.Message);  }
+            catch (Exception e){return StatusCode(500, e.Message);}
 
             return Ok();
         }
