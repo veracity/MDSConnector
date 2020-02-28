@@ -10,5 +10,7 @@ namespace MDSConnector.APIClients
     {
         public Task<bool> UploadVesselNames(string fileName, List<VesselNameModel> vesselNames);
 
+        public Task<bool> UploadStringToFile(string fileName, string content);
+
     }
 }

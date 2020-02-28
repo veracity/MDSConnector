@@ -42,5 +42,20 @@ namespace MDSConnector.APIClients
             }
             return true;
         }
+
+        public async Task<bool> UploadStringToFile(string fileName, string content)
+        {
+            var container = new CloudBlobContainer(new Uri(_config.sasToken));
+            try
+            {
+                var blob = container.GetBlockBlobReference(fileName);
+                await blob.UploadTextAsync(content);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

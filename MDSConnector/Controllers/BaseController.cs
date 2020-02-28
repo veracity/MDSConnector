@@ -50,7 +50,7 @@ namespace MDSConnector.Controllers
             try
             {
                 var vesselNames = await _mdsClient.GetVesselNames();
-                var fileName = "vesselNames_" + Guid.NewGuid().ToString() + ".json"; 
+                var fileName = "vesselNames/vesselNames_" + Guid.NewGuid().ToString() + ".json"; 
                 await _azureStorageClient.UploadVesselNames(fileName, vesselNames);
             }
             catch (Exception e){return StatusCode(500, e.Message);}
@@ -64,9 +64,16 @@ namespace MDSConnector.Controllers
         public async Task<IActionResult> GetInfrastructure()
         {
 
-            var infrastructureRes = await _mdsClient.GetInfrastructure();
+            try
+            {
+                var infrastructureRes = await _mdsClient.GetInfrastructure();
+                var fileName = "infrastructure/infrastructure_" + Guid.NewGuid().ToString() + ".json";
+                await _azureStorageClient.UploadStringToFile(fileName, infrastructureRes);
+            }
+            catch (Exception e){ return StatusCode(500, e.Message); }
 
-            return Ok(infrastructureRes);
+
+            return Ok();
         }
     }
 }
