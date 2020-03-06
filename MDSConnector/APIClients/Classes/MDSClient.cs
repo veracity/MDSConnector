@@ -46,7 +46,7 @@ namespace MDSConnector.APIClients
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
 
             var response = await _client.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)  
             {
                 throw new Exception("Get vessel names failed");
             }

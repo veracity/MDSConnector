@@ -16,6 +16,8 @@ using MDSConnector.APIClients;
 using MDSConnector.Models;
 using System.Xml;
 using Newtonsoft.Json;
+using System.Xml.Linq;
+using System.Runtime.Serialization.Json;
 
 namespace MDSConnector.Controllers
 {
@@ -49,7 +51,7 @@ namespace MDSConnector.Controllers
         public async Task<IActionResult> UploadVesselNames([FromQuery(Name = "format")] string format)
         {
 
-
+            var fileName = "";
             try
             {
                 var supportedFormats = new HashSet<string> { "xml", "json" };
@@ -58,7 +60,7 @@ namespace MDSConnector.Controllers
                     return StatusCode(406, $"format: {format} not supported for this endpoint");
                 }
 
-                var fileName = "vesselNames/vesselNames_" + Guid.NewGuid().ToString() + $".{format}";
+                fileName = "vesselNames/vesselNames_" + Guid.NewGuid().ToString() + $".{format}";
                 var vesselNames = await _mdsClient.GetVesselNamesString();
                 string fileContent = "";
                 if (format == "xml")
@@ -75,7 +77,7 @@ namespace MDSConnector.Controllers
             }
             catch (Exception e) { return StatusCode(500, e.Message); }
 
-            return Ok();
+            return Ok($"File path: {fileName}");
         }
 
         [HttpGet]
@@ -83,16 +85,34 @@ namespace MDSConnector.Controllers
         public async Task<IActionResult> UploadInfrastructure([FromQuery(Name = "format")] string format)
         {
 
+            var fileName = "";
             try
             {
+                var supportedFormats = new HashSet<string> { "xml", "json" };
+                if (!supportedFormats.Contains(format.ToLower()))
+                {
+                    return StatusCode(406, $"format: {format} not supported for this endpoint");
+                }
+
                 var infrastructureRes = await _mdsClient.GetInfrastructure();
-                var fileName = "infrastructure/infrastructure_" + Guid.NewGuid().ToString() + ".json";
-                await _azureStorageClient.UploadStringToFile(fileName, infrastructureRes);
+                fileName = "infrastructure/infrastructure_" + Guid.NewGuid().ToString() + $".{format}";
+                var fileContent = "";
+                if (format == "xml")
+                {
+                    var xmlString = XDocument.Load(JsonReaderWriterFactory.CreateJsonReader(
+                                    Encoding.ASCII.GetBytes(infrastructureRes), new XmlDictionaryReaderQuotas())).ToString();
+                    fileContent = xmlString;
+                }
+                else if (format == "json")
+                {
+                    fileContent = infrastructureRes;
+                }
+                await _azureStorageClient.UploadStringToFile(fileName, fileContent);
             }
             catch (Exception e){ return StatusCode(500, e.Message); }
 
 
-            return Ok();
+            return Ok($"File path: {fileName}");
         }
     }
 }
