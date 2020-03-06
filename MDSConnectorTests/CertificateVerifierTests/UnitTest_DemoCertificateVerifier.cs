@@ -1,10 +1,10 @@
-using Microsoft.VisualStsudio.TestTools.UnitTesting;
 using MDSConnector.Utilities;
 using System.Security.Cryptography.X509Certificates;
 using MDSConnectorTests.Utilities;
 using Moq;
 using System;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MDSConnectorTests
 {

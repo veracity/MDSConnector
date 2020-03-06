@@ -18,6 +18,7 @@ using System.Xml;
 using Newtonsoft.Json;
 using System.Xml.Linq;
 using System.Runtime.Serialization.Json;
+using System.Net;
 
 namespace MDSConnector.Controllers
 {
@@ -28,6 +29,7 @@ namespace MDSConnector.Controllers
         private readonly ILogger<BaseController> _logger;
         private readonly IMDSClient _mdsClient;
         private readonly IAzureStorageClient _azureStorageClient;
+        private static readonly HashSet<string> supportedFormats = new HashSet<string> { "xml", "json" };
 
         public BaseController(ILogger<BaseController> logger, IMDSClient mdsClient, IAzureStorageClient azureStorageClient)
         {
@@ -45,6 +47,87 @@ namespace MDSConnector.Controllers
             return "This is the server";
         }
 
+        [HttpGet]
+        //[Authorize]
+        [Route("/getvesselnames")]
+        public async Task<IActionResult> GetVesselNames([FromQuery(Name = "format")] string format)
+        {
+            format = format == null ? "xml" : format;
+            if (!supportedFormats.Contains(format.ToLower()))
+            {
+                return StatusCode(406, $"format: {format} not supported for this endpoint");
+            }
+
+            var vesselNames = await _mdsClient.GetVesselNamesString();
+            var content = "";
+
+            if (format == "xml")
+            {
+                //content = vesselNames;
+                Response.ContentType = "text/xml";
+                return new ContentResult
+                        {
+                            Content = vesselNames,
+                            ContentType = "text/xml",
+                            StatusCode = 200
+                        };
+                        
+            }
+            else
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(vesselNames);
+                content = JsonConvert.SerializeObject(doc);
+                return new ContentResult
+                {
+                    Content = content,
+                    ContentType = "text/json",
+                    StatusCode = 200
+                };
+            }
+   
+        }
+
+
+        [HttpGet]
+        //[Authorize]
+        [Route("/infrastructure")]
+        public async Task<IActionResult> GetInfrastructure([FromQuery(Name = "format")] string format)
+        {
+            format = format == null ? "json" : format;
+            if (!supportedFormats.Contains(format.ToLower()))
+            {
+                return StatusCode(406, $"format: {format} not supported for this endpoint");
+            }
+            var infrastructure = await _mdsClient.GetInfrastructure();
+            var content = "";
+
+            if (format == "xml")
+            {
+                var xmlString = XDocument.Load(JsonReaderWriterFactory.CreateJsonReader(
+                                    Encoding.ASCII.GetBytes(infrastructure), new XmlDictionaryReaderQuotas())).ToString();
+                content = xmlString;
+                return new ContentResult
+                {
+                    Content = xmlString,
+                    ContentType = "text/xml",
+                    StatusCode = 200
+                };
+            }
+            else
+            {
+                content = infrastructure;
+                return new ContentResult
+                {
+                    Content = content,
+                    ContentType = "text/json",
+                    StatusCode = 200
+                };
+            }
+
+        }
+
+
 
         [HttpGet]
         [Route("/upload/getvesselnames")]
@@ -54,7 +137,7 @@ namespace MDSConnector.Controllers
             var fileName = "";
             try
             {
-                var supportedFormats = new HashSet<string> { "xml", "json" };
+                format = format == null ? "xml" : format;
                 if (!supportedFormats.Contains(format.ToLower()))
                 {
                     return StatusCode(406, $"format: {format} not supported for this endpoint");
@@ -88,7 +171,7 @@ namespace MDSConnector.Controllers
             var fileName = "";
             try
             {
-                var supportedFormats = new HashSet<string> { "xml", "json" };
+                format = format == null ? "json" : format;
                 if (!supportedFormats.Contains(format.ToLower()))
                 {
                     return StatusCode(406, $"format: {format} not supported for this endpoint");
