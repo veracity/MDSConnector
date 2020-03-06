@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Authentication;
 using System.Net.Http;
 using MDSConnector.Utilities.ConfigHelpers;
 using MDSConnector.APIClients;
+using System.Text;
+using MDSConnector.Authentication;
 
 namespace MDSConnector
 {
@@ -56,17 +58,12 @@ namespace MDSConnector
 
 
             services.AddControllers()
-                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);                
+                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddAuthentication(options =>
             {
-                //options.DefaultAuthenticateScheme = "CustomCertificationAuthentication";
                 options.DefaultScheme = "CustomCertificationAuthentication";
             })
-            .AddCertificate()
             .AddScheme<AuthenticationSchemeOptions, CustomCertificateAuthenticator>("CustomCertificationAuthentication", null);
-
-            services.AddTransient<ICertificateVerifier, DemoCertificateVerifier>();
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

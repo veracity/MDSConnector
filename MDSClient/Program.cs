@@ -31,7 +31,7 @@ namespace MDSClient
             //var response = await client.GetAsync(new Uri("https://localhost:10001"));
             //Console.WriteLine(response.Content);
 
-            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["crt"], "1234");
+            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["expired"], "1234");
             Console.WriteLine(certificateFromFile.Verify());
             HttpClientSingleton.create(certificateFromFile); 
 
@@ -40,8 +40,10 @@ namespace MDSClient
             var request = buildRequest("https://localhost:10001",
                                     HttpMethod.Get,
                                     headers);
-                
 
+
+            //HttpClient client = new HttpClient();
+            //var response = await client.SendAsync(request);
             var response = await HttpClientSingleton.Instance.sendAsync(request);
 
 

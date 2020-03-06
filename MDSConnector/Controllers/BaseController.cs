@@ -44,7 +44,15 @@ namespace MDSConnector.Controllers
         {
             var claims = HttpContext.User.Claims;
             var identity = HttpContext.User.Identity;
-            return "This is the server";
+            StringBuilder builder = new StringBuilder();
+            foreach (var claim in claims)
+            {
+                builder.Append(claim.Type);
+                builder.Append("\t");
+                builder.Append(claim.Value);
+                builder.Append("\n");
+            }
+            return builder.ToString();
         }
 
         [HttpGet]
