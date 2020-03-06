@@ -54,6 +54,25 @@ namespace MDSConnector.APIClients
             return await VesselNamesResponseParser.Parse(response);
         }
 
+        public async Task<string> GetVesselNamesString()
+        {
+            if (_token == null) { await GetAuthToken(); }
+
+
+            var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Get;
+            request.RequestUri = new Uri(_config.baseUrl + "/connector/navtor/getvesselnames");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
+
+            var response = await _client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Get vessel names failed");
+            }
+
+            return await response.Content.ReadAsStringAsync(); ;
+        }
+
 
         public async Task<string> GetInfrastructure()
         {
@@ -71,8 +90,8 @@ namespace MDSConnector.APIClients
             }
 
             var responseContent = await response.Content.ReadAsStringAsync();
-
-
+            responseContent = responseContent.Replace(@"\n", "").Replace(@"\", "");
+            responseContent = responseContent.Substring(1, responseContent.Length - 2);
 
             return responseContent;
 

@@ -14,6 +14,8 @@ using MDSConnector.Utilities.ConfigHelpers;
 using Microsoft.Extensions.Options;
 using MDSConnector.APIClients;
 using MDSConnector.Models;
+using System.Xml;
+using Newtonsoft.Json;
 
 namespace MDSConnector.Controllers
 {
@@ -43,25 +45,42 @@ namespace MDSConnector.Controllers
 
 
         [HttpGet]
-        //[Authorize]
-        [Route("getvesselnames")]
-        public async Task<IActionResult> GetVesselNames()
+        [Route("/upload/getvesselnames")]
+        public async Task<IActionResult> UploadVesselNames([FromQuery(Name = "format")] string format)
         {
+
+
             try
             {
-                var vesselNames = await _mdsClient.GetVesselNames();
-                var fileName = "vesselNames/vesselNames_" + Guid.NewGuid().ToString() + ".json"; 
-                await _azureStorageClient.UploadVesselNames(fileName, vesselNames);
+                var supportedFormats = new HashSet<string> { "xml", "json" };
+                if (!supportedFormats.Contains(format.ToLower()))
+                {
+                    return StatusCode(406, $"format: {format} not supported for this endpoint");
+                }
+
+                var fileName = "vesselNames/vesselNames_" + Guid.NewGuid().ToString() + $".{format}";
+                var vesselNames = await _mdsClient.GetVesselNamesString();
+                string fileContent = "";
+                if (format == "xml")
+                {
+                    fileContent = vesselNames;
+                }
+                else if (format == "json")
+                {
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(vesselNames);
+                    fileContent = JsonConvert.SerializeObject(doc);
+                }
+                await _azureStorageClient.UploadStringToFile(fileName, fileContent);
             }
-            catch (Exception e){return StatusCode(500, e.Message);}
+            catch (Exception e) { return StatusCode(500, e.Message); }
 
             return Ok();
         }
 
         [HttpGet]
-        //[Authorize]
-        [Route("infrastructure")]
-        public async Task<IActionResult> GetInfrastructure()
+        [Route("/upload/infrastructure")]
+        public async Task<IActionResult> UploadInfrastructure([FromQuery(Name = "format")] string format)
         {
 
             try

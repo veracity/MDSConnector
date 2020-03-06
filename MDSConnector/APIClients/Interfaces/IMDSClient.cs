@@ -9,6 +9,8 @@ namespace MDSConnector.APIClients
     public interface IMDSClient
     {
         public Task<List<VesselNameModel>> GetVesselNames();
+
+        public Task<string> GetVesselNamesString();
         public Task<string> GetInfrastructure();
     }
 }
