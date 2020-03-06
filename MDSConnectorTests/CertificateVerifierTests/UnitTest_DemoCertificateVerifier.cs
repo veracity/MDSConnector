@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStsudio.TestTools.UnitTesting;
 using MDSConnector.Utilities;
 using System.Security.Cryptography.X509Certificates;
 using MDSConnectorTests.Utilities;
@@ -71,7 +71,7 @@ namespace MDSConnectorTests
             //Act
             var verificationResult = verifier.verify(certificate, new HashSet<string>());
 
-            //Assert
+            //Assert    
             Assert.AreEqual(false, verificationResult.valid);
             Assert.AreEqual("Google", verificationResult.reason);
         }

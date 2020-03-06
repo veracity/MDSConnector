@@ -1,0 +1,27 @@
+{
+    "@context": "https://w3id.org/idsa/contexts/2.0.0/context.jsonld",
+    "@type": "ids:BaseConnector",
+    "description": [
+        {
+            "@value": "Providing navigational data for MS Bergen Office and MS Johan Bergen",
+            "@language": "@en"
+        }
+    ],
+    "catalog": {
+        "@type": "ids:Catalog",
+        "@id": "https://w3id.org/idsa/autogen/catalog/fb7b2649-0942-4516-89d2-0ddf7589b3f8"
+    },
+    "maintainer": "https://www.sintef.no/",
+    "curator": "https://www.navtor.com/",
+    "inboundModelVersion": [
+        "2.0.1"
+    ],
+    "outboundModelVersion": "2.0.1",
+    "title": [
+        {
+            "@value": "MDS Connector NAVTOR",
+            "@language": "@en"
+        }
+    ],
+    "@id": "https://w3id.org/idsa/autogen/baseConnector/02049e0a-4aa3-4dc2-86ba-9a480de30bf7"
+}
