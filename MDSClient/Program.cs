@@ -31,7 +31,7 @@ namespace MDSClient
             //var response = await client.GetAsync(new Uri("https://localhost:10001"));
             //Console.WriteLine(response.Content);
 
-            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["expired"], "1234");
+            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["pfx"], "1234");
             Console.WriteLine(certificateFromFile.Verify());
             HttpClientSingleton.create(certificateFromFile); 
 

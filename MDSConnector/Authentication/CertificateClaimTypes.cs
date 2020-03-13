@@ -13,7 +13,5 @@ namespace MDSConnector.Authentication
         public const string Subject = ClaimTypeNamespace  + "/subject";
         public const string Issuer = ClaimTypeNamespace + "/Issuer";
         public const string Thumbprint = ClaimTypeNamespace + "/Thumbprint";
-        public const string Admin = ClaimTypeNamespace + "/Admin";
-        public const string Company = ClaimTypeNamespace + "/Company";
     }
 }

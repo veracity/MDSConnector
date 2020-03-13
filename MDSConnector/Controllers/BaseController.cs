@@ -19,6 +19,7 @@ using Newtonsoft.Json;
 using System.Xml.Linq;
 using System.Runtime.Serialization.Json;
 using System.Net;
+using MDSConnector.Authentication;
 
 namespace MDSConnector.Controllers
 {
@@ -39,7 +40,8 @@ namespace MDSConnector.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
+        [CertificateAuthorized]
         public string Get()
         {
             var claims = HttpContext.User.Claims;
@@ -60,6 +62,8 @@ namespace MDSConnector.Controllers
         [Route("/getvesselnames")]
         public async Task<IActionResult> GetVesselNames([FromQuery(Name = "format")] string format)
         {
+
+            return Ok("vesselNames");
             format = format == null ? "xml" : format;
             if (!supportedFormats.Contains(format.ToLower()))
             {
@@ -102,6 +106,7 @@ namespace MDSConnector.Controllers
         [Route("/infrastructure")]
         public async Task<IActionResult> GetInfrastructure([FromQuery(Name = "format")] string format)
         {
+            return Ok("infrastructure");
             format = format == null ? "json" : format;
             if (!supportedFormats.Contains(format.ToLower()))
             {
