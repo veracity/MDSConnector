@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace MDSConnector.Authentication
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class CertificateAuthorizedAttribute : AuthorizeAttribute, IAuthorizationFilter
+    public class AdminAuthorizedAttribute : AuthorizeAttribute, IAuthorizationFilter
     {
 
         public void OnAuthorization(AuthorizationFilterContext context)
@@ -27,10 +27,12 @@ namespace MDSConnector.Authentication
                 || !user.HasClaim(c => c.Type == CertificateClaimTypes.Subject)
                 || !user.HasClaim(c => c.Type == CertificateClaimTypes.Issuer)
                 || !user.HasClaim(c => c.Type == CertificateClaimTypes.Thumbprint)
-                || user.FindFirst(c => c.Type == ClaimTypes.AuthenticationMethod).Value != "Certificate")
+                || user.FindFirst(c => c.Type == ClaimTypes.AuthenticationMethod).Value != "Certificate"
+                || user.FindFirst(c => c.Type == ClaimTypes.Role).Value != "Admin")
             {
                 context.Result = new ForbidResult();
             }
+
             return;
         }
     }

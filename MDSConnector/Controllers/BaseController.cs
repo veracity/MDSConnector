@@ -58,6 +58,14 @@ namespace MDSConnector.Controllers
         }
 
         [HttpGet]
+        [Route("/admin")]
+        [AdminAuthorized]
+        public string adminPage()
+        {
+            return "You are an admin!";
+        }
+
+        [HttpGet]
         //[Authorize]
         [Route("/getvesselnames")]
         public async Task<IActionResult> GetVesselNames([FromQuery(Name = "format")] string format)

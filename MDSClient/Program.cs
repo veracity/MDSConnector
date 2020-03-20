@@ -24,7 +24,9 @@ namespace MDSClient
             {
                 {"pfx", @"\clientCertificates\root_ca_dnvgl_dev.pfx"},
                 {"crt", @"\clientCertificates\root_ca_dnvgl_dev.crt"},
-                {"expired", @"\clientCertificates\dnvgl_expired.pfx"}
+                {"expired", @"\clientCertificates\dnvgl_expired.pfx"},
+                {"microsoft", @"\clientCertificates\root_ca_microsoft_dev.pfx"},
+                {"google", @"\clientCertificates\root_ca_google.pfx"}
             };
 
             //HttpClient client = new HttpClient();
@@ -33,11 +35,13 @@ namespace MDSClient
 
             var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["pfx"], "1234");
             Console.WriteLine(certificateFromFile.Verify());
-            HttpClientSingleton.create(certificateFromFile); 
+            HttpClientSingleton.create(certificateFromFile);
+
+            Console.WriteLine(certificateFromFile.Issuer);
 
             var headers = new Dictionary<string, string>();
 
-            var request = buildRequest("https://localhost:10001",
+            var request = buildRequest("https://localhost:10001/admin",
                                     HttpMethod.Get,
                                     headers);
 
@@ -50,9 +54,6 @@ namespace MDSClient
             var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Resposne: {responseString}");
             Console.WriteLine($"Res code: {response.StatusCode}");
-
-
-
         }
 
 

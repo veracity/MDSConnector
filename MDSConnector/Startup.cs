@@ -40,12 +40,15 @@ namespace MDSConnector
             //Initiate config objects
             IConfigurationSection mdsSection = Configuration.GetSection("MDSConfig");
             services.Configure<MDSConfig>(mdsSection);
-            IConfigurationSection azureStorageSection = Configuration.GetSection("azureStorageConfig");
+            IConfigurationSection azureStorageSection = Configuration.GetSection("AzureStorageConfig");
             services.Configure<AzureStorageConfig>(azureStorageSection);
+            IConfiguration knownCertificateIssuersSection = Configuration.GetSection("KnownCertificateIssuers");
+            services.Configure<KnownCertificateIssuers>(knownCertificateIssuersSection);
 
             services.AddScoped<HttpClient>();
             services.AddScoped<IMDSClient, MDSClient>();
             services.AddScoped<IAzureStorageClient, AzureStorageClient>();
+            var s = services;
 
 
             services.AddLogging(config =>

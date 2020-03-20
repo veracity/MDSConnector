@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using MDSConnector.Utilities.ConfigHelpers;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -16,14 +17,20 @@ namespace MDSConnector.Authentication
     public class CustomCertificateAuthenticator : AuthenticationHandler<AuthenticationSchemeOptions>
     {
 
+        private KnownCertificateIssuers _knownCertificateIssuers;
+
         public CustomCertificateAuthenticator(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock
+            ISystemClock clock,
+            //KnownCertificateIssuers knownCertificateIssuers
+            IOptions<KnownCertificateIssuers> knownCertificateIssuers
             )
         : base(options, logger, encoder, clock)
         {
+            _knownCertificateIssuers = knownCertificateIssuers.Value;
+
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -45,10 +52,22 @@ namespace MDSConnector.Authentication
             //    return AuthenticateResult.Fail("Certificate not valid");
             //}
 
-            if (!validIssuerAndSubject(clientCertificate))
+            if (!VerifyStartAndExpiration(clientCertificate))
+            {
+                return AuthenticateResult.Fail("Invalid notBefore and/or notAfter");
+            }
+
+            if (!VerifyIssuerDomain(clientCertificate))
+            {
+                return AuthenticateResult.Fail("Invalid issuer");
+            }
+            
+            if (!VerifyIssuerAndSubject(clientCertificate))
             {
                 return AuthenticateResult.Fail("Issuer and subject domain miss match");
             }
+
+
 
             var claims = new Claim[5];
             claims[0] = new Claim(ClaimTypes.AuthenticationMethod, "Certificate");
@@ -70,17 +89,38 @@ namespace MDSConnector.Authentication
             return AuthenticateResult.Success(ticket);
         }
 
-        private bool validIssuerAndSubject(X509Certificate2 clientCerficate)
+
+        private bool VerifyStartAndExpiration(X509Certificate2 clientCertificate)
+        {
+            var now = DateTime.Now;
+            var notAfter = clientCertificate.NotAfter;
+            var notBefore = clientCertificate.NotBefore;
+            if (DateTime.Compare(notAfter, now.AddMinutes(30)) < 0)
+            {
+                return false;
+            }
+
+            if (DateTime.Compare(notBefore, now) > 0)
+            {
+                return false;
+            }
+            return true;
+        }
+        private bool VerifyIssuerAndSubject(X509Certificate2 clientCerficate)
         {
             var issuer = clientCerficate.Issuer;
             var subject = clientCerficate.Subject;
 
-            var regex = new Regex(@"(?<=@)[^.]+(?=\.)");
 
-            var issuerDomain = regex.Match(issuer).Value;
-            var subjectDomain = regex.Match(subject).Value;
+            return issuer == subject;
+        }
 
-            return issuerDomain == subjectDomain;
+        private bool VerifyIssuerDomain(X509Certificate2 clientCertificate)
+        {
+            var issuer = clientCertificate.Issuer;
+            return Array.Exists(_knownCertificateIssuers.validIssuers, x => x.ToString().ToLower() == issuer.ToLower());
+            //return _knownCertificateIssuers.validIssuers.Exists(x => x == issuerDomain.ToLower());
+
         }
 
 
