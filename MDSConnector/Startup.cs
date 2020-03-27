@@ -21,6 +21,7 @@ using MDSConnector.Utilities.ConfigHelpers;
 using MDSConnector.APIClients;
 using System.Text;
 using MDSConnector.Authentication;
+using MDSConnector.Utilities.Time;
 
 namespace MDSConnector
 {
@@ -48,8 +49,7 @@ namespace MDSConnector
             services.AddScoped<HttpClient>();
             services.AddScoped<IMDSClient, MDSClient>();
             services.AddScoped<IAzureStorageClient, AzureStorageClient>();
-            var s = services;
-
+            services.AddSingleton<ITimeProvider, DefaultTimeProvider>();
 
             services.AddLogging(config =>
             {

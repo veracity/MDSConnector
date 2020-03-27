@@ -1,4 +1,6 @@
-﻿using MDSConnector.Utilities.ConfigHelpers;
+﻿using MDSConnector.Utilities;
+using MDSConnector.Utilities.ConfigHelpers;
+using MDSConnector.Utilities.Time;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,6 +20,7 @@ namespace MDSConnector.Authentication
     {
 
         private KnownCertificateIssuers _knownCertificateIssuers;
+        private ITimeProvider _timeProvider;
 
         public CustomCertificateAuthenticator(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -25,11 +28,13 @@ namespace MDSConnector.Authentication
             UrlEncoder encoder,
             ISystemClock clock,
             //KnownCertificateIssuers knownCertificateIssuers
-            IOptions<KnownCertificateIssuers> knownCertificateIssuers
+            IOptions<KnownCertificateIssuers> knownCertificateIssuers,
+            ITimeProvider timeProvider
             )
         : base(options, logger, encoder, clock)
         {
             _knownCertificateIssuers = knownCertificateIssuers.Value;
+            _timeProvider = timeProvider;
 
         }
 
@@ -92,7 +97,7 @@ namespace MDSConnector.Authentication
 
         private bool VerifyStartAndExpiration(X509Certificate2 clientCertificate)
         {
-            var now = DateTime.Now;
+            var now = _timeProvider.GetNow();
             var notAfter = clientCertificate.NotAfter;
             var notBefore = clientCertificate.NotBefore;
             if (DateTime.Compare(notAfter, now.AddMinutes(30)) < 0)

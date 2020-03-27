@@ -17,7 +17,7 @@ namespace MDSConnector.Authentication.Tests
     public class AdminAuthorizedAttributeTests
     {
         [TestMethod()]
-        public void UnauthorizedResult_UserNotAuthenticated()
+        public void When_UserNotAuthenticated_Expect_UnauthorizedResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
@@ -46,7 +46,7 @@ namespace MDSConnector.Authentication.Tests
         }
 
         [TestMethod()]
-        public void ForbidResult_UserNoAuthenticationMethod()
+        public void When_UserNoAuthenticationMethod_Expect_ForbidResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
@@ -71,7 +71,7 @@ namespace MDSConnector.Authentication.Tests
         }
 
         [TestMethod()]
-        public void ForbidResult_UserWrongAuthenticationMethod()
+        public void When_UserWrongAuthenticationMethod_Expect_ForbidResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
@@ -97,7 +97,7 @@ namespace MDSConnector.Authentication.Tests
         }
 
         [TestMethod()]
-        public void ForbidResult_UserNoRole()
+        public void When_UserNoRole_Expect_ForbidResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
@@ -122,7 +122,7 @@ namespace MDSConnector.Authentication.Tests
         }
 
         [TestMethod()]
-        public void ForbidResult_UserNoSubject()
+        public void When_UserNoSubject_Expect_ForbidResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
@@ -149,7 +149,7 @@ namespace MDSConnector.Authentication.Tests
         }
 
         [TestMethod()]
-        public void ForbidResult_UserNoIssuer()
+        public void When_UserNoIssuer_Expect_ForbidResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
@@ -176,7 +176,7 @@ namespace MDSConnector.Authentication.Tests
         }
 
         [TestMethod()]
-        public void ForbidResult_UserNoThumbprint()
+        public void When_UserNoThumbprint_Expect_ForbidResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
@@ -201,7 +201,7 @@ namespace MDSConnector.Authentication.Tests
         }
 
         [TestMethod()]
-        public void ForbidResult_UserNotAdmin()
+        public void When_UserNotAdmin_Expect_ForbidResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
@@ -228,7 +228,7 @@ namespace MDSConnector.Authentication.Tests
         }
 
         [TestMethod()]
-        public void NoResult_UserCorrect()
+        public void When_UserCorrect_Expect_NoResult()
         {
             // Arrange
             var adminAuthorizedAttribute = new AdminAuthorizedAttribute();
