@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.Utilities.ConfigHelpers
 {
-    public class KnownCertificateIssuers
+    public class AdminThumbprints
     {
-        public string[] ValidIssuers { get; set; }
+        public string[] Value { get; set; }
     }
 }

@@ -45,6 +45,9 @@ namespace MDSConnector
             services.Configure<AzureStorageConfig>(azureStorageSection);
             IConfiguration knownCertificateIssuersSection = Configuration.GetSection("KnownCertificateIssuers");
             services.Configure<KnownCertificateIssuers>(knownCertificateIssuersSection);
+            IConfiguration adminThumbprintSection = Configuration.GetSection("AdminThumbprints");
+            services.Configure<AdminThumbprints>(adminThumbprintSection);
+
 
             services.AddScoped<HttpClient>();
             services.AddScoped<IMDSClient, MDSClient>();
@@ -66,7 +69,7 @@ namespace MDSConnector
             {
                 options.DefaultScheme = "CustomCertificationAuthentication";
             })
-            .AddScheme<AuthenticationSchemeOptions, CustomCertificateAuthenticator>("CustomCertificationAuthentication", null);
+            .AddScheme<AuthenticationSchemeOptions, CustomCertificateAuthenticationHandler>("CustomCertificationAuthentication", null);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -16,25 +16,28 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.Authentication
 {
-    public class CustomCertificateAuthenticator : AuthenticationHandler<AuthenticationSchemeOptions>
+    public class CustomCertificateAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
 
         private KnownCertificateIssuers _knownCertificateIssuers;
         private ITimeProvider _timeProvider;
+        private AdminThumbprints _adminThumbprints;
 
-        public CustomCertificateAuthenticator(
+        public CustomCertificateAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
             //KnownCertificateIssuers knownCertificateIssuers
             IOptions<KnownCertificateIssuers> knownCertificateIssuers,
+            IOptions<AdminThumbprints> adminThumbprints,
             ITimeProvider timeProvider
             )
         : base(options, logger, encoder, clock)
         {
             _knownCertificateIssuers = knownCertificateIssuers.Value;
             _timeProvider = timeProvider;
+            _adminThumbprints = adminThumbprints.Value;
 
         }
 
@@ -79,7 +82,7 @@ namespace MDSConnector.Authentication
             claims[1] = new Claim(CertificateClaimTypes.Subject, clientCertificate.Subject);
             claims[2] = new Claim(CertificateClaimTypes.Issuer, clientCertificate.Issuer);
             claims[3] = new Claim(CertificateClaimTypes.Thumbprint, clientCertificate.Thumbprint);
-            if (clientCertificate.Thumbprint == "8FE88E11E00CF7C0C4E93A1E3BDF977EF2785BE3")
+            if (VerifyIsAdmin(clientCertificate))
             {
                 claims[4] = new Claim(ClaimTypes.Role, "Admin");
             }
@@ -92,6 +95,13 @@ namespace MDSConnector.Authentication
             var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
             return AuthenticateResult.Success(ticket);
+        }
+
+
+        private bool VerifyIsAdmin(X509Certificate2 clientCerticicate)
+        {
+            var clientThumbprint = clientCerticicate.Thumbprint;
+            return Array.Exists(_adminThumbprints.Value, t => t == clientThumbprint);
         }
 
 
@@ -123,7 +133,7 @@ namespace MDSConnector.Authentication
         private bool VerifyIssuerDomain(X509Certificate2 clientCertificate)
         {
             var issuer = clientCertificate.Issuer;
-            return Array.Exists(_knownCertificateIssuers.validIssuers, x => x.ToString().ToLower() == issuer.ToLower());
+            return Array.Exists(_knownCertificateIssuers.ValidIssuers, x => x.ToString().ToLower() == issuer.ToLower());
             //return _knownCertificateIssuers.validIssuers.Exists(x => x == issuerDomain.ToLower());
 
         }
