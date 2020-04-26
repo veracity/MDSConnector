@@ -10,9 +10,15 @@ using System.Xml.Serialization;
 
 namespace MDSConnector.Utilities.ResponseParsers
 {
+    /// <summary>
+    /// Utility class that parses raw response from MDS APi endpoint getvesselnames to data models
+    /// </summary>
     public class VesselNamesResponseParser
     {
 
+        /// <summary>
+        /// Parses the response to data model
+        /// </summary>
         public static async Task<List<VesselNameModel>> Parse(HttpResponseMessage httpResponse)
         {
             List<VesselNameModel> vesselNames = new List<VesselNameModel>();

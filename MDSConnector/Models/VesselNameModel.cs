@@ -6,7 +6,9 @@ using System.Xml.Serialization;
 
 namespace MDSConnector.Models
 {
-
+    /// <summary>
+    /// Data model used for parsing api response from MDS API, endpoint getvesselnames.
+    /// </summary>
     [XmlRoot(ElementName = "VesselName", Namespace = "http://schemas.datacontract.org/2004/07/NavService")]
     public class VesselNameModel
     {

@@ -12,6 +12,11 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.APIClients
 {
+    /// <summary>
+    /// Wrapper class for communication with azure storage
+    /// uses Microsoft pacakge Microsoft.Azure.Storage.Blob
+    /// Documentation: https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-dotnet
+    /// </summary>
     public class AzureStorageClient : IAzureStorageClient
     {
 
@@ -19,6 +24,7 @@ namespace MDSConnector.APIClients
         private readonly HttpClient _client;
         private readonly AzureStorageConfig _config;
        
+
         public AzureStorageClient(ILogger<IAzureStorageClient> logger, HttpClient client, IOptions<AzureStorageConfig> config)
         {
             _logger = logger;
@@ -26,6 +32,10 @@ namespace MDSConnector.APIClients
             _config = config.Value;
         }
 
+
+        /// <summary>
+        /// Upload implementation more specific to a data model.
+        /// </summary>
         public async Task<bool> UploadVesselNames(string fileName, List<VesselNameModel> vesselNames)
         {
             var container = new CloudBlobContainer(new Uri(_config.sasToken));
@@ -43,6 +53,10 @@ namespace MDSConnector.APIClients
             return true;
         }
 
+
+        /// <summary>
+        /// Generic method that uploads string to a blob at an azure storage location
+        /// </summary>
         public async Task<bool> UploadStringToFile(string fileName, string content)
         {
             var container = new CloudBlobContainer(new Uri(_config.sasToken));

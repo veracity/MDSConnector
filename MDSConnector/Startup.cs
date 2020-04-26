@@ -48,7 +48,7 @@ namespace MDSConnector
             IConfiguration adminThumbprintSection = Configuration.GetSection("AdminThumbprints");
             services.Configure<AdminThumbprints>(adminThumbprintSection);
 
-
+            //Add objects that are needed for different parts of the program to the serviceCollection
             services.AddScoped<HttpClient>();
             services.AddScoped<IMDSClient, MDSClient>();
             services.AddScoped<IAzureStorageClient, AzureStorageClient>();
@@ -65,6 +65,8 @@ namespace MDSConnector
 
             services.AddControllers()
                 .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            
+            //Configure authentication, this is where the custom authentication scheme/method is specified.
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = "CustomCertificationAuthentication";
@@ -84,6 +86,7 @@ namespace MDSConnector
 
             app.UseRouting();
 
+            //specify that authentication is used
             app.UseAuthentication();
             app.UseAuthorization();
 

@@ -16,6 +16,10 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.Authentication
 {
+    //<summary>
+    //A custom authentication handler that replaces the default .net core certificate authentication handler.
+    //This is where you should put custom logic in order to do custom authentication based on X509Certificates
+    //</summary>
     public class CustomCertificateAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
 
@@ -28,7 +32,6 @@ namespace MDSConnector.Authentication
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            //KnownCertificateIssuers knownCertificateIssuers
             IOptions<KnownCertificateIssuers> knownCertificateIssuers,
             IOptions<AdminThumbprints> adminThumbprints,
             ITimeProvider timeProvider
@@ -41,6 +44,11 @@ namespace MDSConnector.Authentication
 
         }
 
+        //<summary>
+        //Handles the authentication for the client request. Contains logic that determines which claims the client
+        //is granted
+        //(Proof of concept purposes)
+        //<summary>
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var clientCertificate = await Context.Connection.GetClientCertificateAsync();
@@ -55,6 +63,8 @@ namespace MDSConnector.Authentication
                 return AuthenticateResult.Success(defaultTicket);
             }
 
+            //Since we are testing with self signed certificates, this would never return true.
+            //This should be done in a production environment
             //if (!clientCertificate.Verify())
             //{
             //    return AuthenticateResult.Fail("Certificate not valid");
@@ -98,13 +108,20 @@ namespace MDSConnector.Authentication
         }
 
 
+        //<summary>
+        //Helper function for verifying a client certificate. Verifies that 
+        //(Proof of concept purposes)
+        //<summary>
         private bool VerifyIsAdmin(X509Certificate2 clientCerticicate)
         {
             var clientThumbprint = clientCerticicate.Thumbprint;
             return Array.Exists(_adminThumbprints.Value, t => t == clientThumbprint);
         }
 
-
+        //<summary>
+        //Helper function for verifying a client certificate.
+        //(Proof of concept purposes)
+        //<summary>
         private bool VerifyStartAndExpiration(X509Certificate2 clientCertificate)
         {
             var now = _timeProvider.GetNow();
@@ -121,15 +138,23 @@ namespace MDSConnector.Authentication
             }
             return true;
         }
+
+        //<summary>
+        //Helper function for verifying a client certificate.
+        //(Proof of concept purposes)
+        //<summary>
         private bool VerifyIssuerAndSubject(X509Certificate2 clientCerficate)
         {
             var issuer = clientCerficate.Issuer;
             var subject = clientCerficate.Subject;
 
-
             return issuer == subject;
         }
 
+        //<summary>
+        //Helper function for verifying a client certificate.
+        //(Proof of concept purposes)
+        //<summary>
         private bool VerifyIssuerDomain(X509Certificate2 clientCertificate)
         {
             var issuer = clientCertificate.Issuer;

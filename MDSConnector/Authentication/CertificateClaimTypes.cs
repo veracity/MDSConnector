@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.Authentication
 {
+    /// <summary>
+    /// Custom claim types that define claims related to certificate authentication
+    /// </summary>
     public class CertificateClaimTypes
     {
 

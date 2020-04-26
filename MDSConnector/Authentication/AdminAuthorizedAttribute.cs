@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.Authentication
 {
+    /// <summary>
+    /// Custom authorization attribute that denies access to all request that is not authenticated using a certificate or does not have the claim "admin"
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class AdminAuthorizedAttribute : AuthorizeAttribute, IAuthorizationFilter
     {

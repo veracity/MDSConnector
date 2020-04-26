@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace MDSConnector.Utilities.ConfigHelpers
 {
+    /// <summary>
+    /// Data class that contains the SAS token for uploading data to destination veracity container
+    /// </summary>
     public class AzureStorageConfig
     {
         public string sasToken { get; set; }
