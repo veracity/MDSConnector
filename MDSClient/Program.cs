@@ -11,6 +11,11 @@ using System.Net.Security;
 
 namespace MDSClient
 {
+
+    /// <summary>
+    /// An simple client program that can communicate with the MDSConnector, authenticated using X509Certificate.
+    /// Can be used to demonstrate the certificate authentication process.
+    /// </summary>
     class Program
     {
 
@@ -29,9 +34,6 @@ namespace MDSClient
                 {"google", @"\clientCertificates\root_ca_google.pfx"}
             };
 
-            //HttpClient client = new HttpClient();
-            //var response = await client.GetAsync(new Uri("https://localhost:10001"));
-            //Console.WriteLine(response.Content);
 
             var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["admin"], "1234");
             Console.WriteLine(certificateFromFile.Verify());
@@ -46,8 +48,6 @@ namespace MDSClient
                                     headers);
 
 
-            //HttpClient client = new HttpClient();
-            //var response = await client.SendAsync(request);
             var response = await HttpClientSingleton.Instance.sendAsync(request);
 
 
@@ -67,7 +67,6 @@ namespace MDSClient
 
             foreach (var item in headers)
             {
-                //Console.WriteLine($"Key: {item.Key}, value: {item.Value}");
                 httpRequestMessage.Headers.Add(item.Key, item.Value);
             }
 

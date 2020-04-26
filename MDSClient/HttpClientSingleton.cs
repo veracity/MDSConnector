@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace MDSClient
 {
+    /// <summary>
+    /// Singleton implementation of a httpclient that uses a X509Certificate for authenticating requests.
+    /// </summary>
     sealed class HttpClientSingleton
     {
         private static HttpClientSingleton _instance = null;
