@@ -35,25 +35,30 @@ namespace MDSClient
             };
 
 
-            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["admin"], "1234");
-            Console.WriteLine(certificateFromFile.Verify());
+            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["expired"], "1234");
             HttpClientSingleton.create(certificateFromFile);
 
-            Console.WriteLine(certificateFromFile.Issuer);
-
             var headers = new Dictionary<string, string>();
+            var request = buildRequest("https://localhost:10001/",
+                        HttpMethod.Get,
+                        headers);
+            var response = await HttpClientSingleton.Instance.sendAsync(request);
+            var responseString = await response.Content.ReadAsStringAsync();
 
-            var request = buildRequest("https://localhost:10001/admin",
+
+            headers = new Dictionary<string, string>();
+            var adminRequest = buildRequest("https://localhost:10001/admin",
                                     HttpMethod.Get,
                                     headers);
+            var adminResponse = await HttpClientSingleton.Instance.sendAsync(adminRequest);
+            var adminResponseString = await adminResponse.Content.ReadAsStringAsync();
 
-
-            var response = await HttpClientSingleton.Instance.sendAsync(request);
-
-
-            var responseString = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Resposne: {responseString}");
-            Console.WriteLine($"Res code: {response.StatusCode}");
+            Console.WriteLine("\nClaims endpoint");
+            Console.WriteLine($"Response code: {response.StatusCode}");
+            Console.WriteLine($"Claims: {responseString}");
+            Console.WriteLine("\nAdmin endpoint");
+            Console.WriteLine($"Res code: {adminResponse.StatusCode}");
+            Console.WriteLine($"Resposne: {adminResponseString}");
         }
 
 
