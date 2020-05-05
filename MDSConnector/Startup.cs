@@ -15,6 +15,13 @@ using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics;
 using MDSConnector.Utilities;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using System.Net.Http;
+using MDSConnector.Utilities.ConfigHelpers;
+using MDSConnector.APIClients;
+using System.Text;
+using MDSConnector.Authentication;
+using MDSConnector.Utilities.Time;
 
 namespace MDSConnector
 {
@@ -30,79 +37,41 @@ namespace MDSConnector
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(
-                CertificateAuthenticationDefaults.AuthenticationScheme)
-                .AddCertificate(options =>
-                {
-                    options.AllowedCertificateTypes = CertificateTypes.All;
-                    options.ValidateCertificateUse = false;
-                    options.ValidateValidityPeriod = false;
-                    options.RevocationMode = X509RevocationMode.NoCheck;
-                    options.Events = new CertificateAuthenticationEvents
-                    {
-                        OnCertificateValidated = context =>
-                        {
-                            var certificate = context.ClientCertificate;
 
-                            if (certificate == null)
-                            {
-                                context.Fail("You have not correctly attached a X509 certificate with your request");
-                                return Task.CompletedTask;
-                            }
+            //Initiate config objects
+            IConfigurationSection mdsSection = Configuration.GetSection("MDSConfig");
+            services.Configure<MDSConfig>(mdsSection);
+            IConfigurationSection azureStorageSection = Configuration.GetSection("AzureStorageConfig");
+            services.Configure<AzureStorageConfig>(azureStorageSection);
+            IConfiguration knownCertificateIssuersSection = Configuration.GetSection("KnownCertificateIssuers");
+            services.Configure<KnownCertificateIssuers>(knownCertificateIssuersSection);
+            IConfiguration adminThumbprintSection = Configuration.GetSection("AdminThumbprints");
+            services.Configure<AdminThumbprints>(adminThumbprintSection);
 
+            //Add objects that are needed for different parts of the program to the serviceCollection
+            services.AddScoped<HttpClient>();
+            services.AddScoped<IMDSClient, MDSClient>();
+            services.AddScoped<IAzureStorageClient, AzureStorageClient>();
+            services.AddSingleton<ITimeProvider, DefaultTimeProvider>();
 
-                            var validationService = context.HttpContext.RequestServices.GetService<ICertificateVerifier>();
+            services.AddLogging(config =>
+            {
+                config.AddDebug();
+                config.AddConsole();
+            });
 
-                            var validationResult = validationService.verify(certificate);
-                            Console.WriteLine(validationResult);
-                            if (validationResult.valid)
-                            {
-                                var claims = new[]
-                                {
-                                    new Claim(ClaimTypes.NameIdentifier,
-                                                context.ClientCertificate.Subject,
-                                                ClaimValueTypes.String,
-                                                context.Options.ClaimsIssuer),
-                                };
-                                context.Principal = new ClaimsPrincipal(
-                                     new ClaimsIdentity(claims, context.Scheme.Name));
-                                context.Success();
-                            }
-                            else
-                            {
-                                context.Fail(validationResult.reason);
-                            }
-
-                            return Task.CompletedTask;
-                        }
-                    };
+            services.AddDistributedMemoryCache();
 
 
-                });
-            services.AddControllers();
-            services.AddTransient<ICertificateVerifier, DemoCertificateVerifier>();
-
-
-            //services.AddCertificateForwarding(
-            //    options =>
-            //    {
-            //        options.CertificateHeader = "X-ARR-ClientCert";
-            //        options.HeaderConverter = headerValue =>
-            //        {
-            //            X509Certificate2 certificate = null;
-            //            if (!string.IsNullOrWhiteSpace(headerValue))
-            //            {
-            //                Console.WriteLine(headerValue);
-            //                //byte[] certAsBytes = Convert.ToByte(headerValue);
-            //                byte[] certAsBytes = hexStringToBytes(headerValue);
-            //                certificate = new X509Certificate2(certAsBytes);
-            //            }
-
-
-            //            return certificate;
-            //        };
-            //    });
-
+            services.AddControllers()
+                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            
+            //Configure authentication, this is where the custom authentication scheme/method is specified.
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "CustomCertificationAuthentication";
+            })
+            .AddScheme<AuthenticationSchemeOptions, CustomCertificateAuthenticationHandler>("CustomCertificationAuthentication", null);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -117,7 +86,7 @@ namespace MDSConnector
 
             app.UseRouting();
 
-            //app.UseCertificateForwarding();
+            //specify that authentication is used
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -126,19 +95,6 @@ namespace MDSConnector
                 endpoints.MapControllers();
             });
         }
-
-
-        //public byte[] hexStringToBytes(string hexValue)
-        //{
-        //    string cleaned = hexValue.Replace(" ", "");
-        //    byte[] bytes = new byte[cleaned.Length / 2];
-        //    for (int i = 0; i < cleaned.Length; i+=2)
-        //    {
-        //        bytes[i / 2] = Convert.ToByte(hexValue.Substring(i, 2), 16);
-        //    }
-        //    return bytes;
-
-        //}
 
     }
 }

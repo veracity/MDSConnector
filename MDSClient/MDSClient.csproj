@@ -35,6 +35,12 @@
     <None Update="clientCertificates\root_ca_dnvgl_dev.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="clientCertificates\root_ca_google.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="clientCertificates\root_ca_microsoft_dev.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
