@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace MDSClient
 {
+    /// <summary>
+    /// Singleton implementation of a httpclient that uses a X509Certificate for authenticating requests.
+    /// </summary>
     sealed class HttpClientSingleton
     {
         private static HttpClientSingleton _instance = null;
@@ -21,6 +24,7 @@ namespace MDSClient
         private HttpClientSingleton(X509Certificate2 certificate)
         {
             var clientHandler = new HttpClientHandler();
+            clientHandler.CheckCertificateRevocationList = false;
             clientHandler.ClientCertificates.Add(certificate);
             clientHandler.ClientCertificateOptions = ClientCertificateOption.Manual;
             handler = clientHandler;
@@ -58,8 +62,6 @@ namespace MDSClient
 
         public Task<HttpResponseMessage> sendAsync(HttpRequestMessage request)
         {
-            Console.WriteLine("Break point");
-            
             return client.SendAsync(request);
         }
 
