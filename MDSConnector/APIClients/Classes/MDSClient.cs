@@ -85,7 +85,7 @@ namespace MDSConnector.APIClients
                 throw new Exception("Get vessel names failed");
             }
 
-            return await response.Content.ReadAsStringAsync(); ;
+            return await response.Content.ReadAsStringAsync();
         }
 
         /// <summary>
