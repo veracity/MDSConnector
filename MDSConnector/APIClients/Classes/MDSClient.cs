@@ -94,13 +94,13 @@ namespace MDSConnector.APIClients
 
             var request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
-            request.RequestUri = new Uri(_config.baseUrl + "/msm/mock/api/bunker");
+            request.RequestUri = new Uri(_config.baseUrl + "/wsm/mock/api/bunker");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
 
             var response = await _client.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception("Get Bunker Wilhemsen failed");
+                throw new Exception($"Get Bunker Wilhemsen failed {await response.Content.ReadAsStringAsync()}");
             }
             return await response.Content.ReadAsStringAsync();
         }
@@ -269,7 +269,7 @@ namespace MDSConnector.APIClients
             var response = await _client.PostAsync(_config.baseUrl + "/auth", serializedContent);
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception("Get authorization token failed");
+                throw new Exception($"Get authorization token failed {await response.Content.ReadAsStringAsync()}");
             }
 
             var rawTokens = response.Headers.GetValues("Authorization").ToList();

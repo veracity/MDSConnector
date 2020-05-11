@@ -22,6 +22,7 @@ using MDSConnector.APIClients;
 using System.Text;
 using MDSConnector.Authentication;
 using MDSConnector.Utilities.Time;
+using MDSConnector.Utilities.EUMRV;
 
 namespace MDSConnector
 {
@@ -53,6 +54,7 @@ namespace MDSConnector
             services.AddScoped<IMDSClient, MDSClient>();
             services.AddScoped<IAzureStorageClient, AzureStorageClient>();
             services.AddSingleton<ITimeProvider, DefaultTimeProvider>();
+            services.AddSingleton<IEUMRVReportGenerator, BasicEUMRVReportGenerator>();
 
             services.AddLogging(config =>
             {

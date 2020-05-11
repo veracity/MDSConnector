@@ -11,6 +11,14 @@ namespace MDSConnector.APIClients
     /// </summary>
     public interface IMDSClient
     {
+
+        public Task<string> GetLogAbstractNavtor();
+
+        public Task<string> GetLogAbstractNeuron();
+
+        public Task<string> GetBunkerWilhemsen();
+
+        /// Methods below shoud not in used
         public Task<List<VesselNameModel>> GetVesselNames();
 
         public Task<string> GetVesselNamesString();
