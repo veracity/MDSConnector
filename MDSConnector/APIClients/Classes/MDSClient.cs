@@ -46,6 +46,67 @@ namespace MDSConnector.APIClients
         }
 
         /// <summary>
+        /// Method that communicates with the Navtor logabstract endppoint
+        /// </summary>
+        public async Task<string> GetLogAbstractNavtor()
+        {
+            if (_token == null) {   await GetAuthToken();   }
+
+            var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Get;
+            request.RequestUri = new Uri(_config.baseUrl + "/navtor/mock/api/logabstract");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
+
+            var response = await _client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Get logabstract Navtor failed");
+            }
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        /// <summary>
+        /// Method that communicates with the Neuron logabstract endppoint
+        /// </summary>
+        public async Task<string> GetLogAbstractNeuron()
+        {
+            if (_token == null) { await GetAuthToken(); }
+
+            var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Get;
+            request.RequestUri = new Uri(_config.baseUrl + "/neuron/mock/api/logabstract");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
+
+            var response = await _client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Get logabstract Neuron failed");
+            }
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        /// <summary>
+        /// Method that communicates with the Wilhemsen bunker report endppoint
+        /// </summary>
+        public async Task<string> GetBunkerWilhemsen()
+        {
+            if (_token == null) { await GetAuthToken(); }
+
+            var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Get;
+            request.RequestUri = new Uri(_config.baseUrl + "/wsm/mock/api/bunker");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
+
+            var response = await _client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Get Bunker Wilhemsen failed {await response.Content.ReadAsStringAsync()}");
+            }
+            return await response.Content.ReadAsStringAsync();
+        }
+
+
+        /// <summary>
         /// Method that communicates with the getvesselnames endpoint (return as parsed data models)
         /// </summary>
         public async Task<List<VesselNameModel>> GetVesselNames()
@@ -208,7 +269,7 @@ namespace MDSConnector.APIClients
             var response = await _client.PostAsync(_config.baseUrl + "/auth", serializedContent);
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception("Get authorization token failed");
+                throw new Exception($"Get authorization token failed {await response.Content.ReadAsStringAsync()}");
             }
 
             var rawTokens = response.Headers.GetValues("Authorization").ToList();
