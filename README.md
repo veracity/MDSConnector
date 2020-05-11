@@ -18,6 +18,8 @@ To demonstrate the authentication flow, another program MDSClient is also implem
 
 5.	The authorization attribute inspects the request and checks if all required claims are present. If not, the request is denied access, and the client receives a 401 or 403 depending on the specific request (see code for specifics). If all required claims are present, then the business logic for the endpoint takes over, and the client receives the data that is expected. 
 
+<img src="docs/Certificate%20authentication%20flowchart.png">
+
 **Note that authorization attribute is a mechanism that explicitly DENIES access.** This means all requests will be granted access, unless there is logic that explicitly sets the context result to be a failing result.
 
 Documentation on Authentication in ASP.NET core: https://docs.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-3.1
