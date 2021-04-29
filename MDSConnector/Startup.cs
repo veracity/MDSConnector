@@ -1,28 +1,23 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Authentication.Certificate;
 using System.Security.Cryptography.X509Certificates;
-using System.Diagnostics;
 using MDSConnector.Utilities;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
 using System.Net.Http;
 using MDSConnector.Utilities.ConfigHelpers;
 using MDSConnector.APIClients;
-using System.Text;
-using MDSConnector.Authentication;
 using MDSConnector.Utilities.Time;
 using MDSConnector.Utilities.EUMRV;
+//using Microsoft.Azure.Services.AppAuthentication;
+//using Microsoft.Azure.KeyVault;
+//using Microsoft.Azure.KeyVault.Models;
+using Azure.Security.KeyVault.Certificates;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 
 namespace MDSConnector
 {
@@ -40,18 +35,26 @@ namespace MDSConnector
         {
 
             //Initiate config objects
-            IConfigurationSection mdsSection = Configuration.GetSection("MDSConfig");
-            services.Configure<MDSConfig>(mdsSection);
-            IConfigurationSection azureStorageSection = Configuration.GetSection("AzureStorageConfig");
-            services.Configure<AzureStorageConfig>(azureStorageSection);
-            IConfiguration knownCertificateIssuersSection = Configuration.GetSection("KnownCertificateIssuers");
-            services.Configure<KnownCertificateIssuers>(knownCertificateIssuersSection);
-            IConfiguration adminThumbprintSection = Configuration.GetSection("AdminThumbprints");
-            services.Configure<AdminThumbprints>(adminThumbprintSection);
+            string NeuronUrl = Configuration.GetValue<string>("NeuronUrl");
+            string sasToken = Configuration.GetValue<string>("sasToken");
 
+            var mdsConfig = new MDSConfig();
+            mdsConfig.NeuronUrl = NeuronUrl;
+            services.AddSingleton(mdsConfig);
+
+            var azureStorageConfig = new AzureStorageConfig();
+            azureStorageConfig.sasToken = sasToken;
+            services.AddSingleton(azureStorageConfig);
             //Add objects that are needed for different parts of the program to the serviceCollection
-            services.AddScoped<HttpClient>();
-            services.AddScoped<IMDSClient, MDSClient>();
+
+            var keyvaultName = $"https://mdsconnectorkeyvault.vault.azure.net/";
+            var certificateName = "DNVCertificate";
+
+
+            var httpClient = InitiateHttpClientWithCertificate(keyvaultName, certificateName);
+            //var httpClient = new HttpClient();
+            services.AddSingleton(httpClient);
+            services.AddSingleton<IMDSClient, MDSClient>();
             services.AddScoped<IAzureStorageClient, AzureStorageClient>();
             services.AddSingleton<ITimeProvider, DefaultTimeProvider>();
             services.AddSingleton<IEUMRVReportGenerator, BasicEUMRVReportGenerator>();
@@ -62,18 +65,15 @@ namespace MDSConnector
                 config.AddConsole();
             });
 
-            services.AddDistributedMemoryCache();
 
+            services.AddControllers();
 
-            services.AddControllers()
-                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-            
-            //Configure authentication, this is where the custom authentication scheme/method is specified.
-            services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = "CustomCertificationAuthentication";
-            })
-            .AddScheme<AuthenticationSchemeOptions, CustomCertificateAuthenticationHandler>("CustomCertificationAuthentication", null);
+            ////Configure authentication, this is where the custom authentication scheme/method is specified.
+            //services.AddAuthentication(options =>
+            //{
+            //    options.DefaultScheme = "CustomCertificationAuthentication";
+            //})
+            //.AddScheme<AuthenticationSchemeOptions, CustomCertificateAuthenticationHandler>("CustomCertificationAuthentication", null);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -89,8 +89,8 @@ namespace MDSConnector
             app.UseRouting();
 
             //specify that authentication is used
-            app.UseAuthentication();
-            app.UseAuthorization();
+            //app.UseAuthentication();
+            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
@@ -98,5 +98,35 @@ namespace MDSConnector
             });
         }
 
+        private HttpClient InitiateHttpClientWithCertificate(string keyvaultName, string certificateName)
+        {
+
+            var certificateClient = new CertificateClient(new Uri(keyvaultName), new DefaultAzureCredential());
+            var secretClient = new SecretClient(new Uri(keyvaultName), new DefaultAzureCredential());
+            var keyvaultCertificateWithPolicy = certificateClient.GetCertificate(certificateName);
+
+            Uri secretId = keyvaultCertificateWithPolicy.Value.SecretId;
+            var segments = secretId.Segments;
+            string secretName = segments[2].Trim('/');
+            string version = segments[3].TrimEnd('/');
+
+            KeyVaultSecret secret = secretClient.GetSecret(secretName, version);
+            
+            byte[] privateKeyBytes = Convert.FromBase64String(secret.Value);
+            var certificate = new X509Certificate2(privateKeyBytes, "");
+
+
+
+            var clientHandler = new HttpClientHandler();
+            clientHandler.ServerCertificateCustomValidationCallback =
+            (httpRequestMessage, cert, cetChain, policyErrors) =>
+            {
+                return true;
+            };
+            clientHandler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            clientHandler.ClientCertificates.Add(certificate);
+            
+            return new HttpClient(clientHandler);
+        }
     }
 }

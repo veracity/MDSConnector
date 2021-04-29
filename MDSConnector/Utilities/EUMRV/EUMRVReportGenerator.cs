@@ -17,16 +17,19 @@ namespace MDSConnector.Utilities.EUMRV
         //<summary>
         //Generate the report using this method. It should be stateless and take in all neccesary data from the parameters
         //</summary>
-        public string GenerateLogabstract(Dictionary<string, string> logabstractData)
+        public string GenerateLogabstract(List<Dictionary<string, string>> logabstractData)
         {
             var reportBuilder = new StringBuilder();
-            var entries = logabstractData.ToList();
-            var keys = entries.Select(x => x.Key);
-            var data = entries.Select(x => x.Value);
+            var firstEntry = logabstractData[0];
+            var keys = firstEntry.Select(x => x.Key);
 
             reportBuilder.Append(string.Join(',', keys));
-            reportBuilder.Append("\n");
-            reportBuilder.Append(string.Join(',', data));
+            foreach (var entry in logabstractData)
+            {
+                var data = entry.Select(x => x.Value);
+                reportBuilder.Append("\n");
+                reportBuilder.Append(string.Join(',', data));
+            }
 
             return reportBuilder.ToString();
         }

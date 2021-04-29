@@ -7,7 +7,7 @@ namespace MDSConnector.Utilities.EUMRV
 {
     public interface IEUMRVReportGenerator
     {
-        public string GenerateLogabstract(Dictionary<string, string> logabstractData);
+        public string GenerateLogabstract(List<Dictionary<string, string>> logabstractData);
 
         public string GenerateBunkerReport(Dictionary<string, string> bunkerData);
     }

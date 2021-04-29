@@ -23,24 +23,18 @@ namespace MDSConnector.Authentication
     public class CustomCertificateAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
 
-        private KnownCertificateIssuers _knownCertificateIssuers;
         private ITimeProvider _timeProvider;
-        private AdminThumbprints _adminThumbprints;
 
         public CustomCertificateAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             ISystemClock clock,
-            IOptions<KnownCertificateIssuers> knownCertificateIssuers,
-            IOptions<AdminThumbprints> adminThumbprints,
             ITimeProvider timeProvider
             )
         : base(options, logger, encoder, clock)
         {
-            _knownCertificateIssuers = knownCertificateIssuers.Value;
             _timeProvider = timeProvider;
-            _adminThumbprints = adminThumbprints.Value;
 
         }
 
@@ -74,11 +68,6 @@ namespace MDSConnector.Authentication
             {
                 return AuthenticateResult.Fail("Invalid notBefore and/or notAfter");
             }
-
-            if (!VerifyIssuerDomain(clientCertificate))
-            {
-                return AuthenticateResult.Fail("Invalid issuer");
-            }
             
             if (!VerifyIssuerAndSubject(clientCertificate))
             {
@@ -92,13 +81,13 @@ namespace MDSConnector.Authentication
             claims[1] = new Claim(CertificateClaimTypes.Subject, clientCertificate.Subject);
             claims[2] = new Claim(CertificateClaimTypes.Issuer, clientCertificate.Issuer);
             claims[3] = new Claim(CertificateClaimTypes.Thumbprint, clientCertificate.Thumbprint);
-            if (VerifyIsAdmin(clientCertificate))
-            {
-                claims[4] = new Claim(ClaimTypes.Role, "Admin");
-            }
-            else {
-                claims[4] = new Claim(ClaimTypes.Role, "User");
-            }
+            //if (VerifyIsAdmin(clientCertificate))
+            //{
+            //    claims[4] = new Claim(ClaimTypes.Role, "Admin");
+            //}
+            //else {
+            //    claims[4] = new Claim(ClaimTypes.Role, "User");
+            //}
 
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
@@ -112,11 +101,11 @@ namespace MDSConnector.Authentication
         //Helper function for verifying a client certificate. Verifies that 
         //(Proof of concept purposes)
         //<summary>
-        private bool VerifyIsAdmin(X509Certificate2 clientCerticicate)
-        {
-            var clientThumbprint = clientCerticicate.Thumbprint;
-            return Array.Exists(_adminThumbprints.Value, t => t == clientThumbprint);
-        }
+        //private bool VerifyIsAdmin(X509Certificate2 clientCerticicate)
+        //{
+        //    var clientThumbprint = clientCerticicate.Thumbprint;
+        //    return Array.Exists(_adminThumbprints.Value, t => t == clientThumbprint);
+        //}
 
         //<summary>
         //Helper function for verifying a client certificate.
@@ -150,19 +139,5 @@ namespace MDSConnector.Authentication
 
             return issuer == subject;
         }
-
-        //<summary>
-        //Helper function for verifying a client certificate.
-        //(Proof of concept purposes)
-        //<summary>
-        private bool VerifyIssuerDomain(X509Certificate2 clientCertificate)
-        {
-            var issuer = clientCertificate.Issuer;
-            return Array.Exists(_knownCertificateIssuers.ValidIssuers, x => x.ToString().ToLower() == issuer.ToLower());
-            //return _knownCertificateIssuers.validIssuers.Exists(x => x == issuerDomain.ToLower());
-
-        }
-
-
     }
 }

@@ -11,13 +11,11 @@ namespace MDSConnector.Utilities.ConfigHelpers
     //</summary>
     public class MDSConfig
     {
-        public string username { get; set; }
-        public string password { get; set; }
-        public string baseUrl { get; set; }
+        public string NeuronUrl { get; set; }
         
         public override string ToString()
         {
-            return $"username: {username} \n password: {password} \n baseUrl {baseUrl}";
+            return $"baseUrl {NeuronUrl}";
         }
     }
 

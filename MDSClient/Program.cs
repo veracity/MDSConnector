@@ -8,6 +8,7 @@ using System.Text;
 using System.Net;
 using System.Security.Authentication;
 using System.Net.Security;
+using System.Diagnostics.Tracing;
 
 namespace MDSClient
 {
@@ -18,12 +19,50 @@ namespace MDSClient
     /// </summary>
     class Program
     {
+        //sealed class EventSourceListener : EventListener
+        //{
+        //    private readonly string _eventSourceName;
+        //    private readonly StringBuilder _messageBuilder = new StringBuilder();
 
+        //    public EventSourceListener(string name)
+        //    {
+        //        _eventSourceName = name;
+        //    }
+
+        //    protected override void OnEventSourceCreated(EventSource eventSource)
+        //    {
+        //        base.OnEventSourceCreated(eventSource);
+
+
+        //        EnableEvents(eventSource, EventLevel.LogAlways, EventKeywords.All);
+
+        //    }
+
+        //    protected override void OnEventWritten(EventWrittenEventArgs eventData)
+        //    {
+        //        base.OnEventWritten(eventData);
+
+        //        string message;
+        //        lock (_messageBuilder)
+        //        {
+        //            _messageBuilder.Append("<- Event ");
+        //            _messageBuilder.Append(eventData.EventSource.Name);
+        //            _messageBuilder.Append(" - ");
+        //            _messageBuilder.Append(eventData.EventName);
+        //            _messageBuilder.Append(" : ");
+        //            _messageBuilder.AppendJoin(',', eventData.Payload);
+        //            _messageBuilder.AppendLine(" ->");
+        //            message = _messageBuilder.ToString();
+        //            _messageBuilder.Clear();
+        //        }
+        //        Console.WriteLine(message);
+        //    }
+        //}
         async static Task Main(string[] args)
         {
             Console.WriteLine("This is the Maritime data space client.");
             Console.WriteLine(Directory.GetCurrentDirectory());
-            Console.WriteLine("Loading certificate");
+            Console.WriteLine(Environment.Version.ToString());
 
             var certificatePaths = new Dictionary<string, string>
             {
@@ -34,31 +73,45 @@ namespace MDSClient
                 {"google", @"\clientCertificates\root_ca_google.pfx"}
             };
 
+            var path = Directory.GetCurrentDirectory() + @"/clientCertificates/dnv_client.pfx";
+            //var path = Directory.GetCurrentDirectory() + @"/clientCertificates/dnvgl_expired.pfx";
 
-            var certificateFromFile = await loadCertificate(Directory.GetCurrentDirectory() + certificatePaths["expired"], "1234");
-            HttpClientSingleton.create(certificateFromFile);
+
+            var certificateFromFile = await loadCertificate(path, "wprnbdgtq_@836-Sd#");
+            foreach (var ext in certificateFromFile.Extensions)
+            {
+                if (ext is X509EnhancedKeyUsageExtension)
+                {
+                    Console.WriteLine(ext);
+                }
+            }
+            //var certificateFromFile = await loadCertificate(path, "1234");
+            Console.WriteLine(certificateFromFile.Thumbprint);
+
+            //HttpClientSingleton.create(certificateFromFile);
+            var handler = new HttpClientHandler();
+            //handler.SslProtocols = SslProtocols.Tls12;
+            //using var httpEventListener = new EventSourceListener("Microsoft-System-Net-Http");
+            handler.ClientCertificates.Add(certificateFromFile);
+            handler.CheckCertificateRevocationList = true;
+            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            handler.ServerCertificateCustomValidationCallback =
+            (httpRequestMessage, cert, cetChain, policyErrors) =>
+            {
+                return true;
+            };
+            HttpClient client = new HttpClient(handler);
 
             var headers = new Dictionary<string, string>();
-            var request = buildRequest("https://localhost:10001/",
+            var request = buildRequest("https://mdsconnector02.tk/neuron/bc1/test",
                         HttpMethod.Get,
                         headers);
-            var response = await HttpClientSingleton.Instance.sendAsync(request);
+            
+            var response = client.Send(request);
             var responseString = await response.Content.ReadAsStringAsync();
 
-
-            headers = new Dictionary<string, string>();
-            var adminRequest = buildRequest("https://localhost:10001/admin",
-                                    HttpMethod.Get,
-                                    headers);
-            var adminResponse = await HttpClientSingleton.Instance.sendAsync(adminRequest);
-            var adminResponseString = await adminResponse.Content.ReadAsStringAsync();
-
-            Console.WriteLine("\nClaims endpoint");
-            Console.WriteLine($"Response code: {response.StatusCode}");
-            Console.WriteLine($"Claims: {responseString}");
-            Console.WriteLine("\nAdmin endpoint");
-            Console.WriteLine($"Res code: {adminResponse.StatusCode}");
-            Console.WriteLine($"Resposne: {adminResponseString}");
+            Console.WriteLine(response.StatusCode);
+            Console.WriteLine(responseString);
         }
 
 

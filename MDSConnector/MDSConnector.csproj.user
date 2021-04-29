@@ -3,6 +3,7 @@
   <PropertyGroup>
     <WebStackScaffolding_DependencyDialogWidth>600</WebStackScaffolding_DependencyDialogWidth>
     <ActiveDebugProfile>MSDConnector</ActiveDebugProfile>
+    <NameOfLastUsedPublishProfile>C:\Users\chenh\Desktop\MDSConnector\MDSConnector\Properties\PublishProfiles\MDSConnectorApi - Web Deploy.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>

@@ -1,5 +1,4 @@
-﻿using MDSConnector.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,19 +11,12 @@ namespace MDSConnector.APIClients
     public interface IMDSClient
     {
 
-        public Task<string> GetLogAbstractNavtor();
+        //public Task<string> GetLogAbstractNavtor();
 
         public Task<string> GetLogAbstractNeuron();
 
-        public Task<string> GetBunkerWilhemsen();
+        public Task<string> PingNeuron();
 
-        /// Methods below shoud not in used
-        public Task<List<VesselNameModel>> GetVesselNames();
-
-        public Task<string> GetVesselNamesString();
-        public Task<string> GetInfrastructure();
-        public Task<string> GetFleet();
-        public Task<string> GetRouteInfoForVessel(string vesselID);
-        public Task<string> GetRouteData(string routeID);
+        //public Task<string> GetBunkerWilhemsen();
     }
 }

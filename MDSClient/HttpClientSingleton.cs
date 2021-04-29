@@ -27,6 +27,11 @@ namespace MDSClient
             clientHandler.CheckCertificateRevocationList = false;
             clientHandler.ClientCertificates.Add(certificate);
             clientHandler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            clientHandler.ServerCertificateCustomValidationCallback =
+            (httpRequestMessage, cert, cetChain, policyErrors) =>
+            {
+                return true;
+            };
             handler = clientHandler;
             client = new HttpClient(clientHandler);
         }
@@ -57,6 +62,11 @@ namespace MDSClient
             var clientHandler = new HttpClientHandler();
             clientHandler.ClientCertificates.Add(newCertificate);
             clientHandler.ClientCertificateOptions = ClientCertificateOption.Manual;
+            clientHandler.ServerCertificateCustomValidationCallback =
+                (httpRequestMessage, cert, cetChain, policyErrors) =>
+                {
+                    return true;
+                };
             client = new HttpClient(clientHandler);
         }
 
