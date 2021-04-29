@@ -2,33 +2,23 @@
 The connector is implemented as a RestAPI using ASP.Net core 3.0. The connector is currently a proof of concept, and it has the main purpose of demonstrating the certificate authentication method and communication with the Maritime data space API. Detailed documentation on Maritime data space in given in /documentation
 
 ## **X509 certificate authentication**
-A X509Certificate is the same type of certificates used in the HTTPS protocol, where the client can use it to verify the identity of the web server. In our case, we are using the certificate to verify the identity of a client, who is connecting to us (the connector running as an API service on a server). This is meant to be an alternative for authentication method for users in the whole *Maritime data space*, other than for instance Oauth2.
+A X509Certificate is the same type of certificates used in the HTTPS protocol, where the client can use it to verify the identity of the web server. In our case, we are using the certificate to prove our identity to the Maritime data space API when calling it. 
 
-The certificate authentication feature is implemented using the built-in features of ASP.NET core.
-To demonstrate the authentication flow, another program MDSClient is also implemented. It is made to be able to communicate with the MDSConnector and demonstrate the different authentication results by using different self-signed certificates (fake certificates).
+The certificates used for this project can be found here: https://bitbucket.org/maritime-data-space/mds-onboarding-dnv/src/master/
+Ask Bjørn Marius von Zernichow for access to this bitbucket repository.
 
-### **The life cycle of a request, authenticated using X509Certificate is as follows:**
-1.	Client initiate HTTPS connection to the server, with the certificate attached to the connection. (*How this can be done using .Net core is demonstrated in the MDSClient*)
+Detailed communication pattern is illustrated in the documentation folder and can also be found in the bitbucket repository.
 
-2.	Server receives the request, and the ASP.NET middleware intercepts the request, in order to perform authentication. This middleware is implemented in the class *CustomAuthenticationHandler*.
+## **How to run the connector locally**
+The certificate used in authentication against MDS API is fetched from an Azure Key Vault. With the current settings, the Azure Key Vault used is located in the subscription **DS Veracity Lab**, called **MDSConnectorKeyVault**. You can access it using this link: 
 
-3.	If the connection to the server has a valid certificate according to logic in the authentication handler, appropriate claims are awarded to the request. Otherwise, no claims will be awarded.
+https://portal.azure.com/#@dnv.onmicrosoft.com/resource/subscriptions/691d783c-0f6c-45d5-bcec-aefadc34370a/resourceGroups/MDSConnector/providers/Microsoft.KeyVault/vaults/MDSConnectorKeyVault/overview. 
 
-4.	The request is passed through other middleware and in the end arrives at the endpoint in a controller. This is where the authorization takes place. There are two Authorization attributes implemented in this project, *AdminAuthorizedAttribute* and *CertificateAuthorizedAttribute*.
+You can update the certificate if needed.
 
-5.	The authorization attribute inspects the request and checks if all required claims are present. If not, the request is denied access, and the client receives a 401 or 403 depending on the specific request (see code for specifics). If all required claims are present, then the business logic for the endpoint takes over, and the client receives the data that is expected. 
+The connector also needs a sasToken in order to access the Veracity container, where it uploads the EUMRV reports. Simply go to the appropiate container on data.veracty.com, and generate a sas Token (which is shown as Access key on the website) with the write access. Copy this token and go to the file appsettings.Development.json, there should be a field labeled "sasToken", and its value is empty. Insert the access key as the value for this field.
 
-<img src="documentation/Certificate%20authentication%20flowchart.png">
+Now you can launch the connector from Visual studio, and it should automaticly download the neccasary packages before it runs the connector.
 
-**Note that authorization attribute is a mechanism that explicitly DENIES access.** This means all requests will be granted access, unless there is logic that explicitly sets the context result to be a failing result.
-
-Documentation on Authentication in ASP.NET core: https://docs.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-3.1
-
-Documentation on Authorization in ASP.NET core: https://docs.microsoft.com/en-us/aspnet/core/security/authorization/introduction?view=aspnetcore-3.1
-
-### **Testing**
-
-There are unit tests for the current implementation in the MDSConnectorTests project. These can serve as starting points or templates for new unit tests on new features of the authentication. 
-
-### **Issues with certificate formats**
-When attaching X509Certificates to HttpHandler in ASP.NET core, it appears to be the case that only certificates stored in .pfx format can be used for certificate based authentication. It is still unclear exactly why this is the case, but it should be assosiated with the fact that private keys used for generating the certificate is also stored in the .pfx file. Note that if you install a .pfx certificate in the *Certificate Store* in Windows, and then load from the store, this will not work. It must be loaded directly from the file.
+## **How to deploy the connector**
+The connector is currently deployed as an API Service in the **DS Veracity Lab** Azure subscription. To redeploy the connector, open the MDSConnector project in Visual Studio, right click on the project and select publish, then follow the menu to deploy to the location desired.

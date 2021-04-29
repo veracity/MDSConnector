@@ -26,21 +26,16 @@ Documentation on Maritime data space API can be found here: **MISSING**
 
 **The endpoints needed for this business case:**
 
-POST *authentication-endpoint*: https://mds-test.sloppy.zone/auth
 
-GET *bunker-endpoint*: https://mds-test.sloppy.zone/wsm/mock/api/bunker (returns bunker report data)
+GET *Neuron-endpoint*: https://mdsconnector02.tk/neuron/bc1/data (returns data needed for logabstract that is recorded on Neuron Solutions devices)
 
-GET *Neuron-endpoint*: https://mds-test.sloppy.zone/neuron/mock/api/logabstract (returns data needed for logabstract that is recorded on Neuron Solutions devices)
+**More are to be added**
 
-GET *Navtor-endpoint*: https://mds-test.sloppy.zone/navtor/mock/api/logabstract (returns data needed for logabstract that is recorded on Navtor devices)
 
 **How to communicate with the Maritime data space API**
 
-The Maritime data space API is implemented as a REST API and a valid JWT must be attached in the header of each request.
+The Maritime data space API is implemented as a REST API and a valid X509Certificate must be attached to every request. It follows the mTLS protocal, read more here https://en.wikipedia.org/wiki/Mutual_authentication.
 
-The JWT is obtained by calling the *authentication-endpoint*, with the username and password given as entries in the body. The JWT is located in the response header field *Authorization*.
-
-The JWT is then attached to each request to the Maritime Data Space API in the *Authorization* field.
 
 The communication with Maritime data space API is implemented in the class *MDSClient*
 
