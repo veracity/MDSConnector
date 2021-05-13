@@ -34,18 +34,20 @@ namespace MDSConnector.Utilities.EUMRV
             return reportBuilder.ToString();
         }
 
-        public string GenerateBunkerReport(Dictionary<string, string> bunkerData)
+        public string GenerateBunkerReport(List<Dictionary<string, string>> bunkerData)
         {
             var reportBuilder = new StringBuilder();
-
-            var entries = bunkerData.ToList();
-            var keys = entries.Select(x => x.Key);
-            var data = entries.Select(x => x.Value);
+            var firstEntry = bunkerData[0];
+            var keys = firstEntry.Select(x => x.Key);
 
             reportBuilder.Append(string.Join(',', keys));
-            reportBuilder.Append("\n");
-            reportBuilder.Append(string.Join(',', data));
 
+            foreach (var entry in bunkerData)
+            {
+                var data = entry.Select(x => x.Value);
+                reportBuilder.Append("\n");
+                reportBuilder.Append(string.Join(',', data));
+            }
             return reportBuilder.ToString();
         }
 

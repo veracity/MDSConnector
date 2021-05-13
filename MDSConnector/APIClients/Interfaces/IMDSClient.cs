@@ -17,6 +17,6 @@ namespace MDSConnector.APIClients
 
         public Task<string> PingNeuron();
 
-        //public Task<string> GetBunkerWilhemsen();
+        public Task<string> GetBunkerNeuron();
     }
 }

@@ -31,26 +31,6 @@ namespace MDSConnector.APIClients
             _config = config;
         }
 
-        /// <summary>
-        /// Method that communicates with the Navtor logabstract endppoint
-        /// </summary>
-        //public async Task<string> GetLogAbstractNavtor()
-        //{
-        //    if (_token == null) {   await GetAuthToken();   }
-
-        //    var request = new HttpRequestMessage();
-        //    request.Method = HttpMethod.Get;
-        //    request.RequestUri = new Uri(_config.baseUrl + "/navtor/mock/api/logabstract");
-        //    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token.RawData);
-
-        //    var response = await _client.SendAsync(request);
-        //    if (!response.IsSuccessStatusCode)
-        //    {
-        //        throw new Exception("Get logabstract Navtor failed");
-        //    }
-        //    return await response.Content.ReadAsStringAsync();
-        //}
-
         public async Task<string> PingNeuron()
         {
             var request = new HttpRequestMessage();
@@ -70,15 +50,31 @@ namespace MDSConnector.APIClients
         /// </summary>
         public async Task<string> GetLogAbstractNeuron()
         {
-
             var request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
-            request.RequestUri = new Uri(_config.NeuronUrl + "/neuron/bc1/data");
+            request.RequestUri = new Uri(_config.NeuronUrl + "/neuron/bc1/logabstract");
 
             var response = await _client.SendAsync(request);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception("Get logabstract Neuron failed");
+            }
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        /// <summary>
+        /// Method that communicates with the Neuron bunker report endppoint
+        /// </summary>
+        public async Task<string> GetBunkerNeuron()
+        {
+            var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Get;
+            request.RequestUri = new Uri(_config.NeuronUrl + "/neuron/bc1/bunker");
+
+            var response = await _client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Get bunker Neuron failed");
             }
             return await response.Content.ReadAsStringAsync();
         }

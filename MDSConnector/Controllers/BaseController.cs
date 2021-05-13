@@ -69,8 +69,7 @@ namespace MDSConnector.Controllers
         public async Task<IActionResult> GenerateEUMRVReport()
         {
             var asyncRequests = new Dictionary<string, Task<string>>();
-            //asyncRequests["bunker"] = _mdsClient.GetBunkerWilhemsen();
-            //asyncRequests["LANavtor"] = _mdsClient.GetLogAbstractNavtor();
+            asyncRequests["BunkerNeuron"] = _mdsClient.GetBunkerNeuron();
             asyncRequests["LANeuron"] = _mdsClient.GetLogAbstractNeuron();
 
 
@@ -80,32 +79,24 @@ namespace MDSConnector.Controllers
                 results[item.Key] = await item.Value;
             }
 
-            //var bunkerData = JsonConvert.DeserializeObject<Dictionary<string, string>>(results["bunker"]);
-
-            //var logabstractData = new Dictionary<string, string>();
-            //var LANavtor = JsonConvert.DeserializeObject<Dictionary<string, string>>(results["LANavtor"]);
+            var BunkerNeuron = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(results["BunkerNeuron"]);
             var LANeuron = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(results["LANeuron"]);
-            //LANavtor.ToList().ForEach(x => logabstractData[x.Key] = x.Value);
 
             var laReport = _eumrvReportGenerator.GenerateLogabstract(LANeuron);
-            //var bunkerReport = _eumrvReportGenerator.GenerateBunkerReport(bunkerData);
+            var bunkerReport = _eumrvReportGenerator.GenerateBunkerReport(BunkerNeuron);
 
             var now = _timeProvider.GetNow();
 
             var fileName = $"{now.Year}{now.Month}{now.Day}_{Guid.NewGuid()}";
 
             var laName = $"{fileName}_la.csv";
-            //var bunkerName = $"{fileName}_bn.csv";
+            var bunkerName = $"{fileName}_bn.csv";
             var laSuccess = await _azureStorageClient.UploadStringToFile($"upload/{laName}", laReport);
-            //var bunkerSuccess = await _azureStorageClient.UploadStringToFile($"upload/{bunkerName}", bunkerReport);
+            var bunkerSuccess = await _azureStorageClient.UploadStringToFile($"upload/{bunkerName}", bunkerReport);
 
-            //if (bunkerSuccess && laSuccess)
-            //{
-            //    return Ok();
-            //}
-            if (laSuccess)
+            if (bunkerSuccess && laSuccess)
             {
-                return Ok();
+                return Ok("Reports uploaded successfully");
             }
             else
             {

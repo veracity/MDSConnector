@@ -9,6 +9,6 @@ namespace MDSConnector.Utilities.EUMRV
     {
         public string GenerateLogabstract(List<Dictionary<string, string>> logabstractData);
 
-        public string GenerateBunkerReport(Dictionary<string, string> bunkerData);
+        public string GenerateBunkerReport(List<Dictionary<string, string>> bunkerData);
     }
 }

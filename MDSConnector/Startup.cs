@@ -12,9 +12,6 @@ using MDSConnector.Utilities.ConfigHelpers;
 using MDSConnector.APIClients;
 using MDSConnector.Utilities.Time;
 using MDSConnector.Utilities.EUMRV;
-//using Microsoft.Azure.Services.AppAuthentication;
-//using Microsoft.Azure.KeyVault;
-//using Microsoft.Azure.KeyVault.Models;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
@@ -47,12 +44,10 @@ namespace MDSConnector
             services.AddSingleton(azureStorageConfig);
             //Add objects that are needed for different parts of the program to the serviceCollection
 
-            var keyvaultName = $"https://mdsconnectorkeyvault.vault.azure.net/";
-            var certificateName = "DNVCertificate";
-
+            var keyvaultName = Configuration.GetValue<string>("KeyVaultUri");
+            var certificateName = Configuration.GetValue<string>("CertificateName");
 
             var httpClient = InitiateHttpClientWithCertificate(keyvaultName, certificateName);
-            //var httpClient = new HttpClient();
             services.AddSingleton(httpClient);
             services.AddSingleton<IMDSClient, MDSClient>();
             services.AddScoped<IAzureStorageClient, AzureStorageClient>();
@@ -114,8 +109,6 @@ namespace MDSConnector
             
             byte[] privateKeyBytes = Convert.FromBase64String(secret.Value);
             var certificate = new X509Certificate2(privateKeyBytes, "");
-
-
 
             var clientHandler = new HttpClientHandler();
             clientHandler.ServerCertificateCustomValidationCallback =
