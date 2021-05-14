@@ -27,7 +27,9 @@ Documentation on Maritime data space API can be found here: **MISSING**
 **The endpoints needed for this business case:**
 
 
-GET *Neuron-endpoint*: https://mdsconnector02.tk/neuron/bc1/data (returns data needed for logabstract that is recorded on Neuron Solutions devices)
+GET *Neuron-logabstract-endpoint*: https://mdsconnector02.tk/neuron/bc1/logabstract (returns data needed for logabstract that is recorded on Neuron Solutions devices)
+
+GET *Neuron-bunker-endpoint*: https://mdsconnector02.tk/neuron/bc1/bunker (returns data needed for bunker reports recorded on Neuron solutions devces)
 
 **More are to be added**
 
